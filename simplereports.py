@@ -30,7 +30,7 @@ from PyQt4.QtGui import *
 
 from qgis.core import *
 
-#import simplereportsdialog
+import simplereportsdialog
 import aboutdialog
 
 import resources_rc
@@ -94,10 +94,9 @@ class SimpleReportsPlugin:
     self.iface.removePluginMenu(QCoreApplication.translate("SimpleReports", "SimpleReports"), self.actionAbout)
 
   def run(self):
-    #d = simplereportsdialog.SimpleReportsDialog(self.iface)
-    #d.show()
-    #d.exec_()
-    pass
+    d = simplereportsdialog.SimpleReportsDialog(self.iface)
+    d.show()
+    d.exec_()
 
   def about(self):
     d = aboutdialog.AboutDialog()
