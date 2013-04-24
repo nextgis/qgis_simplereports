@@ -1,0 +1,20 @@
+[general]
+name=SimpleReports
+description=Simple report generator
+category=Plugins
+version=0.1.0
+qgisMinimumVersion=1.9.0
+
+author=Alexander Bruy (NextGIS)
+email=alexander.bruy@gmail.com
+
+icon=icons/simplereports.png
+
+tags=vector,report
+
+homepage=http://hub.qgis.org/projects/simplereports
+tracker=http://hub.qgis.org/projects/simplereports/issues
+repository=http://svn.gis-lab.info/simplereports
+
+experimental=True
+deprecated=False
