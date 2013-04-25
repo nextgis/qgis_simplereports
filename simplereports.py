@@ -95,7 +95,6 @@ class SimpleReportsPlugin:
     self.dockWidget = simplereportswidget.SimpleReportsDockWidget(self)
     self.iface.addDockWidget(Qt.LeftDockWidgetArea, self.dockWidget)
     self.dockWidget.visibilityChanged.connect(self.__dockVisibilityChanged)
-    self.actionDock.setChecked(True)
 
   def unload(self):
     self.iface.removeToolBarIcon(self.actionDock)
@@ -122,3 +121,4 @@ class SimpleReportsPlugin:
       self.actionDock.setChecked(True)
     else:
       self.actionDock.setChecked(False)
+      self.dockWidget.resetMapTool()

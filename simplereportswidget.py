@@ -33,6 +33,7 @@ from PyQt4.QtGui import *
 
 from qgis.core import *
 
+import areamaptool
 import simplereports_utils as utils
 
 from .ui.ui_simplereportswidgetbase import Ui_DockWidget
@@ -46,15 +47,70 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
 
     self.plugin = plugin
     self.iface = plugin.iface
+    self.canvas = self.iface.mapCanvas()
+
+    self.mapTool = None
+    self.prevMapTool = None
+    self.extent = None
+
+    #self.layerRegistry = QgsMapLayerRegistry.instance()
+    #self.layerRegistry.layerWasAdded.connect(self.__updateLayers)
+
+    self.btnGenerate.clicked.connect(self.createReport)
+    self.rbExtentUser.toggled.connect(self.selectAOI)
 
     self.manageGui()
 
   def manageGui(self):
-    # temporatily hide template selector
-    #self.label.hide()
-    #self.leTemplate.hide()
-    #self.btnSelectTemplate.hide()
+    self.__updateLayers()
 
+    self.mapTool = areamaptool.AreaMapTool(self.canvas)
+    self.prevMapTool = self.canvas.mapTool()
+
+    self.mapTool.rectangleCreated.connect(self.__getRectangle)
+
+  def selectAOI(self):
+    if self.rbExtentUser.isChecked():
+      self.canvas.setMapTool(self.mapTool)
+    else:
+      self.resetMapTool()
+      self.extent = self.canvas.extent()
+
+  def createReport(self):
+    if self.extent is None:
+      QMessageBox.warning(self,
+                          self.tr("Empty AOI"),
+                          self.tr("Area of interest is not set. Please specify it and try again.")
+                         )
+      return
+
+      settings = QSettings("NextGIS", "SimpleReports")
+      lastDirectory = settings.value("lastReportDir", QVariant( "." )).toString()
+
+      fName = QFileDialog.getSaveFileName(self,
+                                          self.tr("Save file"),
+                                          lastDirectory,
+                                          self.tr("OpenDocument Text (*.odt *.ODT)")
+                                         )
+      if fName.isEmpty():
+        return
+
+      if not fName.toLower().endsWith(".odt"):
+        outPath += ".odt"
+
+      # process data
+
+  def __getRectangle(self):
+    self.extent = self.mapTool.rectangle()
+    self.resetMapTool()
+
+  def resetMapTool(self):
+    self.mapTool.reset()
+    self.canvas.unsetMapTool(self.mapTool)
+    if self.prevMapTool != self.mapTool:
+      self.canvas.setMapTool(self.prevMapTool)
+
+  def __updateLayers(self):
     layers = utils.getVectorLayers()
     relations = self.iface.legendInterface().groupLayerRelationship()
 
@@ -70,9 +126,3 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
       item.setData(0, Qt.UserRole, lay[0])
       item.setCheckState(0, Qt.Unchecked)
     self.lstLayers.blockSignals(False)
-
-  def reject(self):
-    QDialog.reject(self)
-
-  def accept(self):
-    pass
