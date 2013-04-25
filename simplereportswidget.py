@@ -33,21 +33,43 @@ from PyQt4.QtGui import *
 
 from qgis.core import *
 
-import simplereport_utils as utils
+import simplereports_utils as utils
 
-from .ui.ui_simplereportsdialogbase import Ui_Dialog
+from .ui.ui_simplereportswidgetbase import Ui_DockWidget
 
-class SimplereportsDialog(QDialog, Ui_Dialog):
-  def __init__(self, iface):
-    QDialog.__init__(self)
+class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
+  def __init__(self, plugin):
+    QDockWidget.__init__(self, None)
     self.setupUi(self)
 
-    self.iface = iface
+    self.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
+
+    self.plugin = plugin
+    self.iface = plugin.iface
 
     self.manageGui()
 
   def manageGui(self):
-    pass
+    # temporatily hide template selector
+    #self.label.hide()
+    #self.leTemplate.hide()
+    #self.btnSelectTemplate.hide()
+
+    layers = utils.getVectorLayers()
+    relations = self.iface.legendInterface().groupLayerRelationship()
+
+    self.lstLayers.blockSignals(True)
+    for lay in sorted(layers.iteritems(), cmp=locale.strcoll, key=operator.itemgetter(1)):
+      group = utils.getLayerGroup(relations, lay[0])
+
+      item = QTreeWidgetItem(self.lstLayers)
+      if group != "":
+        item.setText(0, QString("%1 - %2").arg(lay[1]).arg(group))
+      else:
+        item.setText(0, QString("%1").arg(lay[1]))
+      item.setData(0, Qt.UserRole, lay[0])
+      item.setCheckState(0, Qt.Unchecked)
+    self.lstLayers.blockSignals(False)
 
   def reject(self):
     QDialog.reject(self)

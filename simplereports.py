@@ -30,7 +30,7 @@ from PyQt4.QtGui import *
 
 from qgis.core import *
 
-import simplereportsdialog
+import simplereportswidget
 import aboutdialog
 
 import resources_rc
@@ -74,30 +74,51 @@ class SimpleReportsPlugin:
                            QCoreApplication.translate("SimpleReports", "This version of SimpleReports requires at least QGIS version 1.9.0. Plugin will not be enabled."))
       return None
 
-    self.actionRun = QAction(QCoreApplication.translate("SimpleReports", "SimpleReports"), self.iface.mainWindow())
-    self.actionRun.setIcon(QIcon(":/icons/simplereports.png"))
-    self.actionRun.setWhatsThis("Simple report generator")
+    self.dockWidget = None
+
+    self.actionDock = QAction(QCoreApplication.translate("SimpleReports", "SimpleReports"), self.iface.mainWindow())
+    self.actionDock.setIcon(QIcon(":/icons/simplereports.png"))
+    self.actionDock.setWhatsThis("Simple report generator")
+    self.actionDock.setCheckable(True)
     self.actionAbout = QAction(QCoreApplication.translate("SimpleReports", "About SimpleReports..."), self.iface.mainWindow())
     self.actionAbout.setIcon(QIcon(":/icons/about.png"))
     self.actionAbout.setWhatsThis("About SimpleReports")
 
-    self.iface.addPluginToMenu(QCoreApplication.translate("SimpleReports", "SimpleReports"), self.actionRun)
+    self.iface.addPluginToMenu(QCoreApplication.translate("SimpleReports", "SimpleReports"), self.actionDock)
     self.iface.addPluginToMenu(QCoreApplication.translate("SimpleReports", "SimpleReports"), self.actionAbout)
-    self.iface.addToolBarIcon(self.actionRun)
+    self.iface.addToolBarIcon(self.actionDock)
 
-    self.actionRun.triggered.connect(self.run)
+    self.actionDock.triggered.connect(self.showHideDockWidget)
     self.actionAbout.triggered.connect(self.about)
 
+    # create dockwidget
+    self.dockWidget = simplereportswidget.SimpleReportsDockWidget(self)
+    self.iface.addDockWidget(Qt.LeftDockWidgetArea, self.dockWidget)
+    self.dockWidget.visibilityChanged.connect(self.__dockVisibilityChanged)
+    self.actionDock.setChecked(True)
+
   def unload(self):
-    self.iface.removeToolBarIcon(self.actionRun)
-    self.iface.removePluginMenu(QCoreApplication.translate("SimpleReports", "SimpleReports"), self.actionRun)
+    self.iface.removeToolBarIcon(self.actionDock)
+    self.iface.removePluginMenu(QCoreApplication.translate("SimpleReports", "SimpleReports"), self.actionDock)
     self.iface.removePluginMenu(QCoreApplication.translate("SimpleReports", "SimpleReports"), self.actionAbout)
 
-  def run(self):
-    d = simplereportsdialog.SimpleReportsDialog(self.iface)
-    d.show()
-    d.exec_()
+    # remove dock widget
+    self.dockWidget.close()
+    del self.dockWidget
+    self.dockWidget = None
+
+  def showHideDockWidget(self):
+    if self.dockWidget.isVisible():
+      self.dockWidget.hide()
+    else:
+      self.dockWidget.show()
 
   def about(self):
     d = aboutdialog.AboutDialog()
     d.exec_()
+
+  def __dockVisibilityChanged(self):
+    if self.dockWidget.isVisible():
+      self.actionDock.setChecked(True)
+    else:
+      self.actionDock.setChecked(False)
