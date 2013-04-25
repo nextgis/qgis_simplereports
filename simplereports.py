@@ -74,6 +74,7 @@ class SimpleReportsPlugin:
                            QCoreApplication.translate("SimpleReports", "This version of SimpleReports requires at least QGIS version 1.9.0. Plugin will not be enabled."))
       return None
 
+
     self.dockWidget = None
 
     self.actionDock = QAction(QCoreApplication.translate("SimpleReports", "SimpleReports"), self.iface.mainWindow())

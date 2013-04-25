@@ -52,9 +52,11 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
     self.mapTool = None
     self.prevMapTool = None
     self.extent = None
+    self.layers = None
 
-    #self.layerRegistry = QgsMapLayerRegistry.instance()
-    #self.layerRegistry.layerWasAdded.connect(self.__updateLayers)
+    self.layerRegistry = QgsMapLayerRegistry.instance()
+    self.layerRegistry.layerWasAdded.connect(self.__addLayer)
+    self.layerRegistry.layerWillBeRemoved.connect(self.__removeLayer)
 
     self.btnGenerate.clicked.connect(self.createReport)
     self.rbExtentUser.toggled.connect(self.selectAOI)
@@ -100,29 +102,45 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
 
       # process data
 
-  def __getRectangle(self):
-    self.extent = self.mapTool.rectangle()
-    self.resetMapTool()
-
   def resetMapTool(self):
     self.mapTool.reset()
     self.canvas.unsetMapTool(self.mapTool)
     if self.prevMapTool != self.mapTool:
       self.canvas.setMapTool(self.prevMapTool)
 
+  def __getRectangle(self):
+    self.extent = self.mapTool.rectangle()
+    self.resetMapTool()
+
+  def __addLayer(self, layer):
+    if layer.id() not in self.layers.keys():
+      self.layers[layer.id()] = unicode(layer.name())
+      self.__updateLayers()
+
+  def __removeLayer(self, layerId):
+    del self.layers[layerId]
+    self.__updateLayers()
+
   def __updateLayers(self):
-    layers = utils.getVectorLayers()
+    if self.layers is None:
+      self.layers = utils.getVectorLayers()
+
+    if len(self.layers) == 0:
+      self.lstLayers.clear()
+      return
+
     relations = self.iface.legendInterface().groupLayerRelationship()
 
-    self.lstLayers.blockSignals(True)
-    for lay in sorted(layers.iteritems(), cmp=locale.strcoll, key=operator.itemgetter(1)):
+    #self.lstLayers.blockSignals(True)
+    self.lstLayers.clear()
+    for lay in sorted(self.layers.iteritems(), cmp=locale.strcoll, key=operator.itemgetter(1)):
       group = utils.getLayerGroup(relations, lay[0])
 
       item = QTreeWidgetItem(self.lstLayers)
-      if group != "":
+      if (group is not None) and (group != ""):
         item.setText(0, QString("%1 - %2").arg(lay[1]).arg(group))
       else:
         item.setText(0, QString("%1").arg(lay[1]))
       item.setData(0, Qt.UserRole, lay[0])
       item.setCheckState(0, Qt.Unchecked)
-    self.lstLayers.blockSignals(False)
+    #self.lstLayers.blockSignals(False)
