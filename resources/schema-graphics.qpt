@@ -1,7 +1,7 @@
-<Composer title="Composer 1" visible="1">
+<Composer title="Макет 1" visible="1">
  <Composition printResolution="300" paperWidth="353" snapGridOffsetX="0" snapGridResolution="10" snapGridOffsetY="0" alignmentSnap="1" snapping="0" numPages="1" paperHeight="250" alignmentSnapTolerance="2" printAsRaster="0">
   <ComposerScaleBar penColor="#000000" style="Numeric" numMapUnitsPerScaleBarUnit="1" alignment="0" brushColor="#000000" numSegments="4" segmentMillimeters="0" fontColor="#000000" font="Droid Sans,12,-1,5,50,0,0,0,0,0" numUnitsPerSegment="0" units="1" labelBarSpace="3" outlineWidth="1" numSegmentsLeft="2" height="3" mapId="0" boxContentSpace="1" unitLabel="m">
-   <ComposerItem width="22" x="124" transparency="0" y="236" rotation="0" height="5.9" positionMode="4" frame="false" outlineWidth="0.3" zValue="5" lastValidViewScaleFactor="2.20056" uuid="{dc19739b-f341-433a-9a49-8c21396a29e3}" id="" background="true" blendMode="0" positionLock="false">
+   <ComposerItem width="22" x="124" transparency="0" y="236" rotation="0" height="5.9" positionMode="4" frame="false" outlineWidth="0.3" zValue="5" lastValidViewScaleFactor="2.20056" uuid="{273a1d72-f5a5-48a9-9d7b-a02bdf681c0e}" id="" background="true" blendMode="0" positionLock="false">
     <FrameColor alpha="255" red="0" blue="0" green="0"/>
     <BackgroundColor alpha="255" red="255" blue="255" green="255"/>
    </ComposerItem>
@@ -172,7 +172,7 @@
      </VectorClassificationItemNg>
     </LayerItem>
    </Model>
-   <ComposerItem width="63" x="288" transparency="0" y="20" rotation="0" height="77.9" positionMode="0" frame="false" outlineWidth="0.3" zValue="3" lastValidViewScaleFactor="2.20056" uuid="{1d8a7b86-b0a3-49d7-92d6-c9e7200a8881}" id="" background="true" blendMode="0" positionLock="false">
+   <ComposerItem width="63" x="288" transparency="0" y="20" rotation="0" height="77.9" positionMode="0" frame="false" outlineWidth="0.3" zValue="3" lastValidViewScaleFactor="2.31356" uuid="{2ea3c420-91dc-44d2-a4b1-2689a579c34d}" id="" background="true" blendMode="0" positionLock="false">
     <FrameColor alpha="255" red="0" blue="0" green="0"/>
     <BackgroundColor alpha="255" red="255" blue="255" green="255"/>
    </ComposerItem>
@@ -212,15 +212,15 @@
     </symbol>
     <Annotation rightDirection="0" bottomDirection="0" format="0" topPosition="1" precision="3" leftDirection="0" rightPosition="1" bottomPosition="1" frameDistance="1" show="0" font="Droid Sans,9,-1,5,50,0,0,0,0,0" leftPosition="1" topDirection="0"/>
    </Grid>
-   <ComposerItem width="284" x="2" transparency="0" y="20" rotation="0" height="216" positionMode="0" frame="false" outlineWidth="0.3" zValue="2" lastValidViewScaleFactor="2.20056" uuid="{5ce32e80-abef-48fe-8119-98d750f6b13d}" id="" background="true" blendMode="0" positionLock="false">
+   <ComposerItem width="284" x="2" transparency="0" y="20" rotation="0" height="216" positionMode="0" frame="false" outlineWidth="0.3" zValue="2" lastValidViewScaleFactor="2.31356" uuid="{3e207ad4-abea-4947-a1b6-998a97abad40}" id="" background="true" blendMode="0" positionLock="false">
     <FrameColor alpha="255" red="0" blue="0" green="0"/>
     <BackgroundColor alpha="255" red="255" blue="255" green="255"/>
    </ComposerItem>
   </ComposerMap>
-  <ComposerLabel valign="128" labelText="Quantum GIS" htmlState="0" halign="4" margin="1">
+  <ComposerLabel valign="128" labelText="[title]" htmlState="0" halign="4" margin="1">
    <LabelFont description="Droid Sans,18,-1,5,50,0,0,0,0,0"/>
    <FontColor red="0" blue="0" green="0"/>
-   <ComposerItem width="353" x="0" transparency="0" y="0" rotation="0" height="20" positionMode="0" frame="false" outlineWidth="0.3" zValue="1" lastValidViewScaleFactor="2.15537" uuid="{c39afbc5-760b-406f-b134-504e7ff998b0}" id="" background="false" blendMode="0" positionLock="false">
+   <ComposerItem width="353" x="0" transparency="0" y="0" rotation="0" height="20" positionMode="0" frame="false" outlineWidth="0.3" zValue="1" lastValidViewScaleFactor="2.31356" uuid="{738ffb5c-bfe1-4c4f-bf4b-57b1c5ea51a5}" id="" background="false" blendMode="0" positionLock="false">
     <FrameColor alpha="255" red="0" blue="0" green="0"/>
     <BackgroundColor alpha="255" red="255" blue="255" green="255"/>
    </ComposerItem>

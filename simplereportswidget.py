@@ -75,6 +75,8 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
 
     self.mapTool.rectangleCreated.connect(self.__getRectangle)
 
+    self.leScale.setValidator(QDoubleValidator(self.leScale))
+
   def selectAOI(self):
     if self.rbExtentUser.isChecked():
       self.canvas.setMapTool(self.mapTool)
@@ -152,12 +154,18 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
     renderer.setDestinationCrs(self.canvas.mapRenderer().destinationCrs())
     renderer.setProjectionsEnabled(self.canvas.hasCrsTransformEnabled())
 
+    # substitutions
+    substitutions = {"title" : "QGIS"}
+    if not self.leTitle.text().isEmpty():
+      substitutions["title"] = self.leTitle.text()
+
     composition = QgsComposition(renderer)
-    composition.loadFromTemplate(myTemplate)
+    composition.loadFromTemplate(myTemplate, substitutions)
 
     myMap = composition.getComposerMapById(0)
-    myMap.setNewExtent(self.extent)
-    myMap.setNewScale(50000)
+    #myMap.setNewExtent(self.extent)
+    if not self.leScale.text().isEmpty():
+      myMap.setNewScale(float(self.leScale.text()))
     img = composition.printPageAsRaster(0)
     img.save("/home/alex/test.png")
 
