@@ -163,7 +163,7 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
     composition.loadFromTemplate(myTemplate, substitutions)
 
     myMap = composition.getComposerMapById(0)
-    #myMap.setNewExtent(self.extent)
+    myMap.setNewExtent(self.extent)
     if not self.leScale.text().isEmpty():
       myMap.setNewScale(float(self.leScale.text()))
     img = composition.printPageAsRaster(0)
