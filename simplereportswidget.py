@@ -30,6 +30,7 @@ import operator
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
+from PyQt4.QtXml import *
 
 from qgis.core import *
 
@@ -37,6 +38,8 @@ import areamaptool
 import simplereports_utils as utils
 
 from .ui.ui_simplereportswidgetbase import Ui_DockWidget
+
+import resources_rc
 
 class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
   def __init__(self, plugin):
@@ -59,6 +62,7 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
     self.layerRegistry.layerWillBeRemoved.connect(self.__removeLayer)
 
     self.btnGenerate.clicked.connect(self.createReport)
+    self.rbExtentCanvas.toggled.connect(self.selectAOI)
     self.rbExtentUser.toggled.connect(self.selectAOI)
 
     self.manageGui()
@@ -100,7 +104,62 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
       if not fName.toLower().endsWith(".odt"):
         outPath += ".odt"
 
-      # process data
+    # get selected layers
+    layerNames = dict()
+    for i in xrange(self.lstLayers.topLevelItemCount()):
+      item = self.lstLayers.topLevelItem(i)
+      if item.checkState(0) == Qt.Checked:
+        layerNames[item.text(0)] = item.data(0, Qt.UserRole).toString()
+
+    # generate map image
+    self.renderSchema()
+    # create attribute table for each layer
+
+  def renderSchema(self):
+    templateFile = QFile(":/resources/schema-graphics.qpt")
+    if not templateFile.open(QIODevice.ReadOnly | QIODevice.Text):
+      QMessageBox.warning(self,
+                          self.tr("Template load error"),
+                          self.tr("Cannot read load composition template from file:\n%1")
+                          .arg(templateFile.errorString())
+                         )
+      return False
+
+    myTemplate = QDomDocument()
+    success, errorString, errorLine, errorColumn = myTemplate.setContent(templateFile, True)
+    if not success:
+      QMessageBox.warning(self,
+                          self.tr("Template load error"),
+                          self.tr("Parse error at line %1, column %2:\n%3")
+                          .arg(errorLine)
+                          .arg(errorColumn)
+                          .arg(errorString)
+                         )
+      myTemplate = None
+      templateFile.close()
+      return False
+
+    templateFile.close()
+
+    # prepare composition
+    renderer = QgsMapRenderer()
+
+    layers = []
+    for layer in self.canvas.layers():
+      layers.append(unicode(layer.id()))
+
+    renderer.setLayerSet(layers)
+    renderer.setDestinationCrs(self.canvas.mapRenderer().destinationCrs())
+    renderer.setProjectionsEnabled(self.canvas.hasCrsTransformEnabled())
+
+    composition = QgsComposition(renderer)
+    composition.loadFromTemplate(myTemplate)
+
+    myMap = composition.getComposerMapById(0)
+    myMap.setNewExtent(self.extent)
+    myMap.setNewScale(50000)
+    img = composition.printPageAsRaster(0)
+    img.save("/home/alex/test.png")
 
   def resetMapTool(self):
     self.mapTool.reset()
@@ -131,7 +190,7 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
 
     relations = self.iface.legendInterface().groupLayerRelationship()
 
-    #self.lstLayers.blockSignals(True)
+    self.lstLayers.blockSignals(True)
     self.lstLayers.clear()
     for lay in sorted(self.layers.iteritems(), cmp=locale.strcoll, key=operator.itemgetter(1)):
       group = utils.getLayerGroup(relations, lay[0])
@@ -143,4 +202,4 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
         item.setText(0, QString("%1").arg(lay[1]))
       item.setData(0, Qt.UserRole, lay[0])
       item.setCheckState(0, Qt.Unchecked)
-    #self.lstLayers.blockSignals(False)
+    self.lstLayers.blockSignals(False)
