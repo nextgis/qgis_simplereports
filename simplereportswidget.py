@@ -35,6 +35,7 @@ from PyQt4.QtXml import *
 from qgis.core import *
 
 import areamaptool
+import odftools
 import simplereports_utils as utils
 
 from .ui.ui_simplereportswidgetbase import Ui_DockWidget
@@ -114,7 +115,31 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
         layerNames[item.text(0)] = item.data(0, Qt.UserRole).toString()
 
     # generate map image
-    self.renderSchema()
+    if not self.renderSchema():
+      QMessageBox.warning(self,
+                          self.tr("Image not found"),
+                          self.tr("Cannot load schema map from temporary file")
+                         )
+      return
+
+    # open template
+    writer = odftools.ODFWriter()
+    writer.setFileName("/home/alex/test.odt")
+    writer.openFile()
+
+    parser = odftools.ODFParser()
+    parser.setContent(writer.readDocument())
+    parser.setManifest(writer.readManifest())
+
+    # add image
+    writer.addPicture(QDir.tempPath() + "/schema-test.png", "schema.png")
+    parser.addPictureToManifest("schema.png")
+    parser.addPictureToDocument("@schema@", "schema.png", 35.297, 24.993)
+    writer.writeManifest(parser.getManifest())
+    writer.writeDocument(parser.getContent())
+    writer.closeFile()
+    print "DONE!"
+
     # create attribute table for each layer
 
   def renderSchema(self):
@@ -167,7 +192,8 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
     if not self.leScale.text().isEmpty():
       myMap.setNewScale(float(self.leScale.text()))
     img = composition.printPageAsRaster(0)
-    img.save("/home/alex/test.png")
+    img.save(QDir.tempPath() + "/schema-test.png")
+    return True
 
   def resetMapTool(self):
     self.mapTool.reset()
