@@ -160,7 +160,7 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
         attrs = f.attributes()
         table = parser.addTableRow(table, attrs)
 
-    parser.writeTable(table)
+      parser.writeTable(table)
 
     writer.writeManifest(parser.getManifest())
     writer.writeDocument(parser.getContent())
