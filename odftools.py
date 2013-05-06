@@ -164,7 +164,9 @@ class ODFParser(QObject):
     paragraphSpan = paragraphBody.ownerDocument().createElement("text:span")
     paragraphValue = paragraphSpan.ownerDocument().createTextNode(unicode(text))
 
-    paragraphSpan.appendChild(paragraphValue)
+    if len(text) > 0:
+      paragraphSpan.appendChild(paragraphValue)
+
     paragraphBody.appendChild(paragraphSpan)
     textBody.appendChild(paragraphBody)
 

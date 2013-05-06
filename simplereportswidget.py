@@ -145,6 +145,7 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
         if layer.editType(i) != QgsVectorLayer.Hidden:
           myAttrs[i] = layer.attributeDisplayName(i)
 
+      parser.addParagraph(k)
       table = parser.addTable(k, len(myAttrs))
 
       # table header
@@ -161,11 +162,11 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
         table = parser.addTableRow(table, attrs)
 
       parser.writeTable(table)
+      parser.addParagraph("")
 
     writer.writeManifest(parser.getManifest())
     writer.writeDocument(parser.getContent())
     writer.closeFile()
-    print "DONE!"
 
   def renderSchema(self):
     templateFile = QFile(":/resources/schema-graphics.qpt")
