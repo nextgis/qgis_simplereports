@@ -58,10 +58,10 @@ class ODFWriter(QObject):
     return self.odfFile.read("META-INF/manifest.xml")
 
   def writeDocument(self, doc):
-    self.odfFile.writestr("content.xml", doc)
+    self.odfFile.writestr("content.xml", doc.encode("utf-8"))
 
   def writeManifest(self, doc):
-    self.odfFile.writestr("META-INF/manifest.xml", doc)
+    self.odfFile.writestr("META-INF/manifest.xml", doc.encode("utf-8"))
 
   def addPicture(self, imgPath, arcName):
     self.odfFile.write(imgPath, "Pictures/" + arcName)
@@ -154,7 +154,21 @@ class ODFParser(QObject):
 
     return False
 
-  def createTable(self, tableName, columns):
+  def addParagraph(self, text):
+    root = self.content.documentElement()
+
+    docBody = root.firstChildElement("office:body")
+    textBody = docBody.firstChildElement("office:text")
+
+    paragraphBody = textBody.ownerDocument().createElement("text:p")
+    paragraphSpan = paragraphBody.ownerDocument().createElement("text:span")
+    paragraphValue = paragraphSpan.ownerDocument().createTextNode(unicode(text))
+
+    paragraphSpan.appendChild(paragraphValue)
+    paragraphBody.appendChild(paragraphSpan)
+    textBody.appendChild(paragraphBody)
+
+  def addTable(self, tableName, columns):
     root = self.content.documentElement()
 
     docBody = root.firstChildElement("office:body")
@@ -176,9 +190,22 @@ class ODFParser(QObject):
       tableCell = tableRow.ownerDocument().createElement("table:table-cell")
       tableCell.setAttribute("office:value-type", "string")
 
-      cellContent = tableCell.ownerDocument().createElement("text:p")
-      cellValue = cellContent.ownerDocument().createTextNode(d)
+      cellContentParagraph = tableCell.ownerDocument().createElement("text:p")
+      cellContentSpan = cellContentParagraph.ownerDocument().createElement("text:span")
+      cellValue = cellContentSpan.ownerDocument().createTextNode(unicode(QVariant(d).toString()))
 
-      cellContent.appendChild(cellValue)
-      tableCell.appendChild(cellContent)
+      cellContentSpan.appendChild(cellValue)
+      cellContentParagraph.appendChild(cellContentSpan)
+      tableCell.appendChild(cellContentParagraph)
       tableRow.appendChild(tableCell)
+
+    table.appendChild(tableRow)
+    return table
+
+  def writeTable(self, table):
+    root = self.content.documentElement()
+
+    docBody = root.firstChildElement("office:body")
+    textBody = docBody.firstChildElement("office:text")
+
+    textBody.appendChild(table)

@@ -137,6 +137,30 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
     parser.addPictureToDocument("@schema@", "schema.png", 35.297, 24.993)
 
     # create attribute table for each layer
+    f = QgsFeature()
+    for k, v in layerNames.iteritems():
+      layer = utils.getVectorLayerById(v)
+      myAttrs = dict()
+      for i in xrange(len(layer.pendingAllAttributesList())):
+        if layer.editType(i) != QgsVectorLayer.Hidden:
+          myAttrs[i] = layer.attributeDisplayName(i)
+
+      table = parser.addTable(k, len(myAttrs))
+
+      # table header
+      table = parser.addTableRow(table, myAttrs.values())
+
+      # table data
+      request = QgsFeatureRequest()
+      request.setFilterRect(self.extent)
+      request.setSubsetOfAttributes(myAttrs.keys())
+      request.setFlags(QgsFeatureRequest.NoGeometry)
+      fit = layer.getFeatures(request)
+      while fit.nextFeature(f):
+        attrs = f.attributes()
+        table = parser.addTableRow(table, attrs)
+
+    parser.writeTable(table)
 
     writer.writeManifest(parser.getManifest())
     writer.writeDocument(parser.getContent())
