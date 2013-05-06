@@ -135,12 +135,13 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
     writer.addPicture(QDir.tempPath() + "/schema-test.png", "schema.png")
     parser.addPictureToManifest("schema.png")
     parser.addPictureToDocument("@schema@", "schema.png", 35.297, 24.993)
+
+    # create attribute table for each layer
+
     writer.writeManifest(parser.getManifest())
     writer.writeDocument(parser.getContent())
     writer.closeFile()
     print "DONE!"
-
-    # create attribute table for each layer
 
   def renderSchema(self):
     templateFile = QFile(":/resources/schema-graphics.qpt")

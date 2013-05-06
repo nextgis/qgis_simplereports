@@ -119,11 +119,17 @@ class ODFParser(QObject):
     root = self.content.documentElement()
 
     docBody = root.firstChildElement("office:body")
-    child = docBody.firstChildElement("text:p")
+    textBody = docBody.firstChildElement("office:text")
+    child = textBody.firstChildElement("text:p")
     while not child.isNull():
-      if child.text() == mark:
+      if child.text().contains(mark):
         # found marker, now replace it with image
-        child.clear()
+
+        if child.hasChildNodes():
+          cn = child.firstChild()
+          child.removeChild(cn)
+          cn = cn.nextSibling()
+
         child.setTagName("text:p")
         child.setAttribute("text:style-name", "Standard")
 
@@ -147,3 +153,32 @@ class ODFParser(QObject):
       child = child.nextSiblingElement()
 
     return False
+
+  def createTable(self, tableName, columns):
+    root = self.content.documentElement()
+
+    docBody = root.firstChildElement("office:body")
+    textBody = docBody.firstChildElement("office:text")
+
+    tableBody = textBody.ownerDocument().createElement("table:table")
+    tableBody.setAttribute("table:name", tableName)
+
+    tableColumns = tableBody.ownerDocument().createElement("table:table-column")
+    tableColumns.setAttribute("table:number-columns-repeated", columns)
+
+    tableBody.appendChild(tableColumns)
+
+    return tableBody
+
+  def addTableRow(self, table, data):
+    tableRow = table.ownerDocument().createElement("table:table-row")
+    for d in data:
+      tableCell = tableRow.ownerDocument().createElement("table:table-cell")
+      tableCell.setAttribute("office:value-type", "string")
+
+      cellContent = tableCell.ownerDocument().createElement("text:p")
+      cellValue = cellContent.ownerDocument().createTextNode(d)
+
+      cellContent.appendChild(cellValue)
+      tableCell.appendChild(cellContent)
+      tableRow.appendChild(tableCell)
