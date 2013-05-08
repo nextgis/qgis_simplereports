@@ -93,19 +93,27 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
                          )
       return
 
-      settings = QSettings("NextGIS", "SimpleReports")
-      lastDirectory = settings.value("lastReportDir", QVariant( "." )).toString()
+    settings = QSettings("NextGIS", "SimpleReports")
+    lastDirectory = settings.value("lastReportDir", QVariant( "." )).toString()
 
-      fName = QFileDialog.getSaveFileName(self,
-                                          self.tr("Save file"),
-                                          lastDirectory,
-                                          self.tr("OpenDocument Text (*.odt *.ODT)")
-                                         )
-      if fName.isEmpty():
-        return
+    fName = QFileDialog.getSaveFileName(self,
+                                        self.tr("Save file"),
+                                        lastDirectory,
+                                        self.tr("OpenDocument Text (*.odt *.ODT)")
+                                       )
+    if fName.isEmpty():
+      return
 
-      if not fName.toLower().endsWith(".odt"):
-        outPath += ".odt"
+    if not fName.toLower().endsWith(".odt"):
+      fName += ".odt"
+
+    templateFile = QFile(":/resources/schema-template.odt")
+    if templateFile.open(QIODevice.ReadOnly):
+      outFile = QFile(fName)
+      if outFile.open(QIODevice.WriteOnly):
+        outFile.write(templateFile.readAll())
+      outFile.close()
+    templateFile.close()
 
     # get selected layers
     layerNames = dict()
@@ -124,7 +132,7 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
 
     # open template
     writer = odftools.ODFWriter()
-    writer.setFileName("/home/alex/test.odt")
+    writer.setFileName(unicode(fName))
     writer.openFile()
 
     parser = odftools.ODFParser()

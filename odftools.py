@@ -118,6 +118,30 @@ class ODFParser(QObject):
   def addPictureToDocument(self, mark, imgName, width, height):
     root = self.content.documentElement()
 
+    # check if style for graphics items exists
+    stylesSection = root.firstChildElement("office:automatic-styles")
+    styleFound = False
+    style = stylesSection.firstChildElement("style:style")
+    while not style.isNull():
+      if style.attribute("style:name") == "fr1" and style.attribute("style:family") == "graphic":
+        styleFound = True
+        break
+      style = style.nextSiblingElement()
+
+    if not styleFound:
+      style = stylesSection.ownerDocument().createElement("style:style")
+      style.setAttribute("style:name", "fr1")
+      style.setAttribute("style:family", "graphic")
+      style.setAttribute("style:parent-style-name", "Graphics")
+
+      props = style.ownerDocument().createElement("style:graphic-properties")
+      props.setAttribute("style:wrap", "none")
+      props.setAttribute("style:horizontal-pos", "center")
+      props.setAttribute("style:horizontal-rel", "paragraph")
+
+      style.appendChild(props)
+      stylesSection.appendChild(style)
+
     docBody = root.firstChildElement("office:body")
     textBody = docBody.firstChildElement("office:text")
     child = textBody.firstChildElement("text:p")
@@ -134,6 +158,7 @@ class ODFParser(QObject):
         child.setAttribute("text:style-name", "Standard")
 
         drawFrame = child.ownerDocument().createElement("draw:frame")
+        drawFrame.setAttribute("draw:style-name", "fr1")
         drawFrame.setAttribute("draw:name", imgName)
         drawFrame.setAttribute("text:anchor-type", "paragraph")
         drawFrame.setAttribute("svg:width", unicode(width) + "cm")

@@ -3,5 +3,6 @@
     <file>icons/simplereports.png</file>
     <file>icons/about.png</file>
     <file>resources/schema-graphics.qpt</file>
+    <file>resources/schema-template.odt</file>
   </qresource>
 </RCC>
