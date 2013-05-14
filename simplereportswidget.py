@@ -61,6 +61,7 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
     self.layerRegistry = QgsMapLayerRegistry.instance()
     self.layerRegistry.layerWasAdded.connect(self.__addLayer)
     self.layerRegistry.layerWillBeRemoved.connect(self.__removeLayer)
+    self.canvas.extentsChanged.connect(self.__updateExtents)
 
     self.btnGenerate.clicked.connect(self.createReport)
     self.rbExtentCanvas.toggled.connect(self.selectAOI)
@@ -149,9 +150,11 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
     for k, v in layerNames.iteritems():
       layer = utils.getVectorLayerById(v)
       myAttrs = dict()
+      attrNames = QStringList()
       for i in xrange(len(layer.pendingAllAttributesList())):
         if layer.editType(i) != QgsVectorLayer.Hidden:
           myAttrs[i] = layer.attributeDisplayName(i)
+          attrNames << layer.pendingFields()[i].name()
 
       parser.addParagraph(k)
       table = parser.addTable(k, len(myAttrs))
@@ -162,12 +165,16 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
       # table data
       request = QgsFeatureRequest()
       request.setFilterRect(self.extent)
+      #request.setFlags(QgsFeatureRequest.NoGeometry)
       request.setSubsetOfAttributes(myAttrs.keys())
-      request.setFlags(QgsFeatureRequest.NoGeometry)
+      #request.setSubsetOfAttributes(attrNames, layer.pendingFields())
       fit = layer.getFeatures(request)
       while fit.nextFeature(f):
         attrs = f.attributes()
-        table = parser.addTableRow(table, attrs)
+        tmp = []
+        for i in myAttrs.keys():
+          tmp.append(attrs[i])
+        table = parser.addTableRow(table, tmp)
 
       parser.writeTable(table)
       parser.addParagraph("")
@@ -175,6 +182,11 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
     writer.writeManifest(parser.getManifest())
     writer.writeDocument(parser.getContent())
     writer.closeFile()
+
+    QMessageBox.information(self,
+                            self.tr("Completed"),
+                            self.tr("Report generated successfully")
+                           )
 
   def renderSchema(self):
     templateFile = QFile(":/resources/schema-graphics.qpt")
@@ -271,3 +283,7 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
       item.setData(0, Qt.UserRole, lay[0])
       item.setCheckState(0, Qt.Unchecked)
     self.lstLayers.blockSignals(False)
+
+  def __updateExtents(self):
+    if not self.rbExtentUser.isChecked():
+      self.extent = self.canvas.extent()

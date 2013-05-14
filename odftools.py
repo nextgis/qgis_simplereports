@@ -219,7 +219,10 @@ class ODFParser(QObject):
 
       cellContentParagraph = tableCell.ownerDocument().createElement("text:p")
       cellContentSpan = cellContentParagraph.ownerDocument().createElement("text:span")
-      cellValue = cellContentSpan.ownerDocument().createTextNode(unicode(QVariant(d).toString()))
+      if hasattr(d, "toString"):
+        cellValue = cellContentSpan.ownerDocument().createTextNode(unicode(d.toString()))
+      else:
+        cellValue = cellContentSpan.ownerDocument().createTextNode(unicode(d))
 
       cellContentSpan.appendChild(cellValue)
       cellContentParagraph.appendChild(cellContentSpan)
