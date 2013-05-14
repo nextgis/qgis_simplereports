@@ -164,10 +164,9 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
 
       # table data
       request = QgsFeatureRequest()
-      request.setFilterRect(self.extent)
-      #request.setFlags(QgsFeatureRequest.NoGeometry)
+      request.setFilterRect(self.canvas.mapRenderer().mapToLayerCoordinates(layer, self.extent))
+      request.setFlags(QgsFeatureRequest.NoGeometry)
       request.setSubsetOfAttributes(myAttrs.keys())
-      #request.setSubsetOfAttributes(attrNames, layer.pendingFields())
       fit = layer.getFeatures(request)
       while fit.nextFeature(f):
         attrs = f.attributes()
@@ -221,16 +220,12 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
     for layer in self.canvas.layers():
       layers.append(unicode(layer.id()))
 
-    renderer.setLayerSet(layers)
-    renderer.setDestinationCrs(self.canvas.mapRenderer().destinationCrs())
-    renderer.setProjectionsEnabled(self.canvas.hasCrsTransformEnabled())
-
     # substitutions
     substitutions = {"title" : "QGIS"}
     if not self.leTitle.text().isEmpty():
       substitutions["title"] = self.leTitle.text()
 
-    composition = QgsComposition(renderer)
+    composition = QgsComposition(self.canvas.mapRenderer())
     composition.loadFromTemplate(myTemplate, substitutions)
 
     myMap = composition.getComposerMapById(0)
