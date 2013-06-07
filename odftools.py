@@ -208,6 +208,7 @@ class ODFParser(QObject):
     tableColumns.setAttribute("table:number-columns-repeated", columns)
 
     tableBody.appendChild(tableColumns)
+    textBody.appendChild(tableBody)
 
     return tableBody
 
@@ -230,7 +231,6 @@ class ODFParser(QObject):
       tableRow.appendChild(tableCell)
 
     table.appendChild(tableRow)
-    return table
 
   def writeTable(self, table):
     root = self.content.documentElement()

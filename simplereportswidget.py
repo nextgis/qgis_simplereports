@@ -160,7 +160,7 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
       table = parser.addTable(k, len(myAttrs))
 
       # table header
-      table = parser.addTableRow(table, myAttrs.values())
+      parser.addTableRow(table, myAttrs.values())
 
       # table data
       request = QgsFeatureRequest()
@@ -173,9 +173,8 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
         tmp = []
         for i in myAttrs.keys():
           tmp.append(attrs[i])
-        table = parser.addTableRow(table, tmp)
+        parser.addTableRow(table, tmp)
 
-      parser.writeTable(table)
       parser.addParagraph("")
 
     writer.writeManifest(parser.getManifest())
