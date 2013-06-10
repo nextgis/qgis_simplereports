@@ -48,11 +48,11 @@ class SimpleReportsPlugin:
     userPluginPath = QFileInfo(QgsApplication.qgisUserDbFilePath()).path() + "/python/plugins/simplereports"
     systemPluginPath = QgsApplication.prefixPath() + "/python/plugins/simplereports"
 
-    overrideLocale = QSettings().value("locale/overrideFlag", QVariant(False)).toBool()
+    overrideLocale = QSettings().value("locale/overrideFlag", False)
     if not overrideLocale:
       localeFullName = QLocale.system().name()
     else:
-      localeFullName = QSettings().value("locale/userLocale", QVariant("")).toString()
+      localeFullName = QSettings().value("locale/userLocale", "")
 
     if QFileInfo(userPluginPath).exists():
       translationPath = userPluginPath + "/i18n/simplereports_" + localeFullName + ".qm"
@@ -70,8 +70,8 @@ class SimpleReportsPlugin:
       qgisVersion = str(self.QgisVersion[ 0 ]) + "." + str(self.QgisVersion[ 2 ]) + "." + str(self.QgisVersion[ 3 ])
       QMessageBox.warning(self.iface.mainWindow(),
                            QCoreApplication.translate("SimpleReports", "Error"),
-                           QCoreApplication.translate("SimpleReports", "Quantum GIS %1 detected.\n").arg(qgisVersion) +
-                           QCoreApplication.translate("SimpleReports", "This version of SimpleReports requires at least QGIS version 1.9.0. Plugin will not be enabled."))
+                           QCoreApplication.translate("SimpleReports", "Quantum GIS %s detected.\n") % (qgisVersion) +
+                           QCoreApplication.translate("SimpleReports", "This version of SimpleReports requires at least QGIS version 2.0. Plugin will not be enabled."))
       return None
 
 

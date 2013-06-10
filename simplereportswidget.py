@@ -95,17 +95,17 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
       return
 
     settings = QSettings("NextGIS", "SimpleReports")
-    lastDirectory = settings.value("lastReportDir", QVariant( "." )).toString()
+    lastDirectory = settings.value("lastReportDir",  ".")
 
     fName = QFileDialog.getSaveFileName(self,
                                         self.tr("Save file"),
                                         lastDirectory,
                                         self.tr("OpenDocument Text (*.odt *.ODT)")
                                        )
-    if fName.isEmpty():
+    if fName == "":
       return
 
-    if not fName.toLower().endsWith(".odt"):
+    if not fName.lower().endswith(".odt"):
       fName += ".odt"
 
     templateFile = QFile(":/resources/schema-template.odt")
@@ -121,7 +121,7 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
     for i in xrange(self.lstLayers.topLevelItemCount()):
       item = self.lstLayers.topLevelItem(i)
       if item.checkState(0) == Qt.Checked:
-        layerNames[item.text(0)] = item.data(0, Qt.UserRole).toString()
+        layerNames[item.text(0)] = item.data(0, Qt.UserRole)
 
     # generate map image
     if not self.renderSchema():
@@ -150,11 +150,11 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
     for k, v in layerNames.iteritems():
       layer = utils.getVectorLayerById(v)
       myAttrs = dict()
-      attrNames = QStringList()
+      attrNames = []
       for i in xrange(len(layer.pendingAllAttributesList())):
         if layer.editType(i) != QgsVectorLayer.Hidden:
           myAttrs[i] = layer.attributeDisplayName(i)
-          attrNames << layer.pendingFields()[i].name()
+          attrNames.append(layer.pendingFields()[i].name())
 
       parser.addParagraph(k)
       table = parser.addTable(k, len(myAttrs))
@@ -201,10 +201,7 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
     if not success:
       QMessageBox.warning(self,
                           self.tr("Template load error"),
-                          self.tr("Parse error at line %1, column %2:\n%3")
-                          .arg(errorLine)
-                          .arg(errorColumn)
-                          .arg(errorString)
+                          self.tr("Parse error at line %d, column %d:\n%s") % (errorLine, errorColumn, errorString)
                          )
       myTemplate = None
       templateFile.close()
@@ -221,7 +218,7 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
 
     # substitutions
     substitutions = {"title" : "QGIS"}
-    if not self.leTitle.text().isEmpty():
+    if self.leTitle.text() != "":
       substitutions["title"] = self.leTitle.text()
 
     composition = QgsComposition(self.canvas.mapRenderer())
@@ -229,7 +226,7 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
 
     myMap = composition.getComposerMapById(0)
     myMap.setNewExtent(self.extent)
-    if not self.leScale.text().isEmpty():
+    if self.leScale.text() != "":
       myMap.setNewScale(float(self.leScale.text()))
     img = composition.printPageAsRaster(0)
     img.save(QDir.tempPath() + "/schema-test.png")
@@ -271,9 +268,9 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
 
       item = QTreeWidgetItem(self.lstLayers)
       if (group is not None) and (group != ""):
-        item.setText(0, QString("%1 - %2").arg(lay[1]).arg(group))
+        item.setText(0, "%s - %s" % (lay[1], group))
       else:
-        item.setText(0, QString("%1").arg(lay[1]))
+        item.setText(0, "%s" % lay[1])
       item.setData(0, Qt.UserRole, lay[0])
       item.setCheckState(0, Qt.Unchecked)
     self.lstLayers.blockSignals(False)

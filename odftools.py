@@ -107,7 +107,7 @@ class ODFParser(QObject):
     return True
 
   def encodeStringForXML(self, string):
-    modifiedString = QString(string)
+    modifiedString = string
     modifiedStr.replace("&", "&amp;")
     modifiedStr.replace("\"", "&quot;") # maybe \&quot; ?
     modifiedStr.replace("'", "&apos;")
@@ -146,7 +146,7 @@ class ODFParser(QObject):
     textBody = docBody.firstChildElement("office:text")
     child = textBody.firstChildElement("text:p")
     while not child.isNull():
-      if child.text().contains(mark):
+      if mark.lower() in child.text().lower():
         # found marker, now replace it with image
 
         if child.hasChildNodes():
