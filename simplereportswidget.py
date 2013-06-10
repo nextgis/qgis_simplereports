@@ -270,7 +270,7 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
       if (group is not None) and (group != ""):
         item.setText(0, "%s - %s" % (lay[1], group))
       else:
-        item.setText(0, "%s" % lay[1])
+        item.setText(0, lay[1])
       item.setData(0, Qt.UserRole, lay[0])
       item.setCheckState(0, Qt.Unchecked)
     self.lstLayers.blockSignals(False)
