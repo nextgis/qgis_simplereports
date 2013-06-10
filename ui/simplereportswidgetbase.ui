@@ -29,11 +29,28 @@
         </widget>
        </item>
        <item>
-        <widget class="QRadioButton" name="rbExtentUser">
-         <property name="text">
-          <string>Select area on canvas with mouse</string>
-         </property>
-        </widget>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QRadioButton" name="rbExtentUser">
+           <property name="text">
+            <string>Select area on canvas with mouse</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="btnMapTool">
+           <property name="toolTip">
+            <string>Select area on canvas</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>

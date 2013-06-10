@@ -63,6 +63,7 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
     self.layerRegistry.layerWillBeRemoved.connect(self.__removeLayer)
     self.canvas.extentsChanged.connect(self.__updateExtents)
 
+    self.btnMapTool.clicked.connect(self.triggerMapTool)
     self.btnGenerate.clicked.connect(self.createReport)
     self.rbExtentCanvas.toggled.connect(self.selectAOI)
     self.rbExtentUser.toggled.connect(self.selectAOI)
@@ -72,6 +73,8 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
   def manageGui(self):
     self.__updateLayers()
 
+    self.btnMapTool.setEnabled(False)
+
     self.mapTool = areamaptool.AreaMapTool(self.canvas)
     self.prevMapTool = self.canvas.mapTool()
 
@@ -79,11 +82,19 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
 
     self.leScale.setValidator(QDoubleValidator(self.leScale))
 
-  def selectAOI(self):
-    if self.rbExtentUser.isChecked():
+  def triggerMapTool(self):
+    if self.btnMapTool.isChecked():
       self.canvas.setMapTool(self.mapTool)
     else:
       self.resetMapTool()
+
+  def selectAOI(self):
+    if self.rbExtentUser.isChecked():
+      self.btnMapTool.setEnabled(True)
+    else:
+      self.btnMapTool.setEnabled(False)
+      self.btnMapTool.setChecked(False)
+      self.resetMapTool(True)
       self.extent = self.canvas.extent()
 
   def createReport(self):
@@ -185,6 +196,7 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
                             self.tr("Completed"),
                             self.tr("Report generated successfully")
                            )
+    self.mapTool.reset()
 
   def renderSchema(self):
     templateFile = QFile(":/resources/schema-graphics.qpt")
@@ -232,15 +244,14 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
     img.save(QDir.tempPath() + "/schema-test.png")
     return True
 
-  def resetMapTool(self):
-    self.mapTool.reset()
+  def resetMapTool(self, clear=False):
+    self.mapTool.reset(clear)
     self.canvas.unsetMapTool(self.mapTool)
     if self.prevMapTool != self.mapTool:
       self.canvas.setMapTool(self.prevMapTool)
 
   def __getRectangle(self):
     self.extent = self.mapTool.rectangle()
-    self.resetMapTool()
 
   def __addLayer(self, layer):
     if layer.id() not in self.layers.keys():

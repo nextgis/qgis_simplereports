@@ -45,12 +45,14 @@ class AreaMapTool(QgsMapToolEmitPoint):
 
     self.reset()
 
-  def reset(self):
+  def reset(self, clear=True):
     self.startPoint = self.endPoint = None
     self.isEmittingPoint = False
-    self.rubberBand.reset(QGis.Polygon)
+    if clear:
+      self.rubberBand.reset(QGis.Polygon)
 
   def canvasPressEvent(self, e):
+    self.reset()
     self.startPoint = self.toMapCoordinates(e.pos())
     self.endPoint = self.startPoint
     self.isEmittingPoint = True
