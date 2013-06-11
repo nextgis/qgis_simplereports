@@ -115,6 +115,26 @@ class ODFParser(QObject):
     modifiedStr.replace(">", "&gt;")
     return modifiedStr
 
+  def getTextElement(self):
+    root = self.content.documentElement()
+    docBody = root.firstChildElement("office:body")
+    textBody = docBody.firstChildElement("office:text")
+
+    return textBody
+
+  def findPlaceholder(self, placeholder):
+    root = self.content.documentElement()
+    docBody = root.firstChildElement("office:body")
+    textBody = docBody.firstChildElement("office:text")
+
+    child = textBody.firstChildElement("text:p")
+    while not child.isNull():
+      if placeholder.lower() in child.text().lower():
+        return child
+      child = child.nextSiblingElement()
+
+    return None
+
   def addPictureToDocument(self, mark, imgName, width, height):
     root = self.content.documentElement()
 
@@ -193,7 +213,7 @@ class ODFParser(QObject):
       paragraphSpan.appendChild(paragraphValue)
 
     paragraphBody.appendChild(paragraphSpan)
-    textBody.appendChild(paragraphBody)
+    return paragraphBody
 
   def addTable(self, tableName, columns):
     root = self.content.documentElement()
@@ -208,7 +228,6 @@ class ODFParser(QObject):
     tableColumns.setAttribute("table:number-columns-repeated", columns)
 
     tableBody.appendChild(tableColumns)
-    textBody.appendChild(tableBody)
 
     return tableBody
 

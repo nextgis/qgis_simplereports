@@ -156,6 +156,10 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
     parser.addPictureToManifest("schema.png")
     parser.addPictureToDocument("@schema@", "schema.png", 35.297, 24.993)
 
+    # find placeholder
+    te = parser.getTextElement()
+    tp = parser.findPlaceholder("@tables@")
+
     # create attribute table for each layer
     f = QgsFeature()
     for k, v in layerNames.iteritems():
@@ -167,7 +171,7 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
           myAttrs[i] = layer.attributeDisplayName(i)
           attrNames.append(layer.pendingFields()[i].name())
 
-      parser.addParagraph(k)
+      tableTitle = parser.addParagraph(k)
       table = parser.addTable(k, len(myAttrs))
 
       # table header
@@ -186,7 +190,13 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
           tmp.append(attrs[i])
         parser.addTableRow(table, tmp)
 
-      parser.addParagraph("")
+      # write table to file
+      te.insertBefore(tableTitle, tp)
+      te.insertBefore(table, tp)
+      te.insertBefore(parser.addParagraph(""), tp)
+
+    # remove placeholder
+    te.removeChild(tp)
 
     writer.writeManifest(parser.getManifest())
     writer.writeDocument(parser.getContent())
