@@ -3,7 +3,7 @@ SOURCES = __init__.py \
           simplereportsdialog.py \
           aboutdialog.py
 
-FORMS = simplereportsdialogbase.ui \
-        aboutdialogbase.ui
+FORMS = ui/simplereportsdialogbase.ui \
+        ui/aboutdialogbase.ui
 
 TRANSLATIONS = i18n/simplereports_ru_RU.ts
