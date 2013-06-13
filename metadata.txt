@@ -14,7 +14,7 @@ tags=vector,report
 
 homepage=http://hub.qgis.org/projects/simplereports
 tracker=http://hub.qgis.org/projects/simplereports/issues
-repository=http://svn.gis-lab.info/simplereports
+repository=http://github.com/nextgis/simplereports
 
 experimental=True
 deprecated=False
