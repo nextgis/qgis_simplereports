@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>381</height>
+    <width>302</width>
+    <height>397</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -123,6 +123,13 @@
      <widget class="QPushButton" name="btnGenerate">
       <property name="text">
        <string>Generate</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QProgressBar" name="progressBar">
+      <property name="value">
+       <number>0</number>
       </property>
      </widget>
     </item>

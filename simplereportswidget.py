@@ -134,6 +134,8 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
       if item.checkState(0) == Qt.Checked:
         layerNames[item.text(0)] = item.data(0, Qt.UserRole)
 
+    self.progressBar.setRange(0, len(layerNames) + 1)
+
     # generate map image
     if not self.renderSchema():
       QMessageBox.warning(self,
@@ -141,6 +143,9 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
                           self.tr("Cannot load schema map from temporary file")
                          )
       return
+
+    self.progressBar.setValue(self.progressBar.value() + 1)
+    QCoreApplication.processEvents()
 
     # open template
     writer = odftools.ODFWriter()
@@ -195,12 +200,18 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
       te.insertBefore(table, tp)
       te.insertBefore(parser.addParagraph(""), tp)
 
+      self.progressBar.setValue(self.progressBar.value() + 1)
+      QCoreApplication.processEvents()
+
     # remove placeholder
     te.removeChild(tp)
 
     writer.writeManifest(parser.getManifest())
     writer.writeDocument(parser.getContent())
     writer.closeFile()
+
+    self.progressBar.setRange(0, 1)
+    self.progressBar.setValue(0)
 
     QMessageBox.information(self,
                             self.tr("Completed"),
