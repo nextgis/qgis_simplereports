@@ -1,7 +1,7 @@
 <Composer title="Composer 1" visible="1">
  <Composition printResolution="300" paperWidth="353" snapGridOffsetX="0" snapGridResolution="10" snapGridOffsetY="0" alignmentSnap="1" snapping="0" numPages="1" paperHeight="250" alignmentSnapTolerance="2" printAsRaster="0">
   <ComposerScaleBar penColor="#000000" style="Numeric" numMapUnitsPerScaleBarUnit="1" alignment="0" brushColor="#000000" numSegments="4" segmentMillimeters="0" fontColor="#000000" font="Droid Sans,12,-1,5,50,0,0,0,0,0" numUnitsPerSegment="0" units="1" labelBarSpace="3" outlineWidth="1" numSegmentsLeft="2" height="3" mapId="0" boxContentSpace="1" unitLabel="m">
-   <ComposerItem width="22" x="131" transparency="0" y="236" rotation="0" height="5.9" positionMode="4" frame="false" outlineWidth="0.3" zValue="5" lastValidViewScaleFactor="2.31356" uuid="{bb29ab7e-8d76-4891-98cb-a1931ef36484}" id="" background="true" blendMode="0" positionLock="true">
+   <ComposerItem width="22" x="131" transparency="0" y="227.864" rotation="0" height="8.13565" positionMode="4" frame="false" outlineWidth="0.3" zValue="5" lastValidViewScaleFactor="2.29084" uuid="{cb40a941-ed51-4cea-b277-7bbc476536e6}" id="" background="true" blendMode="0" positionLock="true">
     <FrameColor alpha="255" red="0" blue="0" green="0"/>
     <BackgroundColor alpha="255" red="255" blue="255" green="255"/>
    </ComposerItem>
@@ -15,8 +15,8 @@
     <style marginTop="2" marginLeft="2" name="symbolLabel" font="Droid Sans,12,-1,5,50,0,0,0,0,0"/>
    </styles>
    <Model autoUpdate="1">
-    <LayerItem layerId="settlements20130426130439451" style="hidden" text="settlements" showFeatureCount="0">
-     <VectorClassificationItemNg text="">
+    <LayerItem layerId="settlements20130426130439451" userText="" style="hidden" text="settlements" showFeatureCount="0">
+     <VectorClassificationItemNg userText="" text="">
       <symbols>
        <symbol alpha="1" type="fill" name="classificationSymbol">
         <layer pass="0" class="SimpleFill" locked="0">
@@ -33,8 +33,8 @@
       </symbols>
      </VectorClassificationItemNg>
     </LayerItem>
-    <LayerItem layerId="road_l_osm20130426130439420" style="hidden" text="road-l-osm" showFeatureCount="0">
-     <VectorClassificationItemNg text="">
+    <LayerItem layerId="road_l_osm20130426130439420" userText="" style="hidden" text="road-l-osm" showFeatureCount="0">
+     <VectorClassificationItemNg userText="" text="">
       <symbols>
        <symbol alpha="1" type="line" name="classificationSymbol">
         <layer pass="0" class="SimpleLine" locked="0">
@@ -54,8 +54,8 @@
       </symbols>
      </VectorClassificationItemNg>
     </LayerItem>
-    <LayerItem layerId="railroad_l20130426130439403" style="hidden" text="railroad-l" showFeatureCount="0">
-     <VectorClassificationItemNg text="">
+    <LayerItem layerId="railroad_l20130426130439403" userText="" style="hidden" text="railroad-l" showFeatureCount="0">
+     <VectorClassificationItemNg userText="" text="">
       <symbols>
        <symbol alpha="1" type="line" name="classificationSymbol">
         <layer pass="0" class="SimpleLine" locked="0">
@@ -75,8 +75,8 @@
       </symbols>
      </VectorClassificationItemNg>
     </LayerItem>
-    <LayerItem layerId="poi_osm20130426130439365" style="hidden" text="poi-osm" showFeatureCount="0">
-     <VectorClassificationItemNg text="">
+    <LayerItem layerId="poi_osm20130426130439365" userText="" style="hidden" text="poi-osm" showFeatureCount="0">
+     <VectorClassificationItemNg userText="" text="">
       <symbols>
        <symbol alpha="1" type="marker" name="classificationSymbol">
         <layer pass="0" class="SimpleMarker" locked="0">
@@ -96,8 +96,8 @@
       </symbols>
      </VectorClassificationItemNg>
     </LayerItem>
-    <LayerItem layerId="oopt20130426130439347" style="hidden" text="oopt" showFeatureCount="0">
-     <VectorClassificationItemNg text="">
+    <LayerItem layerId="oopt20130426130439347" userText="" style="hidden" text="oopt" showFeatureCount="0">
+     <VectorClassificationItemNg userText="" text="">
       <symbols>
        <symbol alpha="1" type="fill" name="classificationSymbol">
         <layer pass="0" class="SimpleFill" locked="0">
@@ -114,8 +114,8 @@
       </symbols>
      </VectorClassificationItemNg>
     </LayerItem>
-    <LayerItem layerId="hydro_l20130426130439284" style="hidden" text="hydro-l" showFeatureCount="0">
-     <VectorClassificationItemNg text="">
+    <LayerItem layerId="hydro_l20130426130439284" userText="" style="hidden" text="hydro-l" showFeatureCount="0">
+     <VectorClassificationItemNg userText="" text="">
       <symbols>
        <symbol alpha="1" type="line" name="classificationSymbol">
         <layer pass="0" class="SimpleLine" locked="0">
@@ -135,8 +135,8 @@
       </symbols>
      </VectorClassificationItemNg>
     </LayerItem>
-    <LayerItem layerId="hydro_a20130426130439222" style="hidden" text="hydro-a" showFeatureCount="0">
-     <VectorClassificationItemNg text="">
+    <LayerItem layerId="hydro_a20130426130439222" userText="" style="hidden" text="hydro-a" showFeatureCount="0">
+     <VectorClassificationItemNg userText="" text="">
       <symbols>
        <symbol alpha="1" type="fill" name="classificationSymbol">
         <layer pass="0" class="SimpleFill" locked="0">
@@ -153,8 +153,8 @@
       </symbols>
      </VectorClassificationItemNg>
     </LayerItem>
-    <LayerItem layerId="admin20130426130438992" style="hidden" text="admin" showFeatureCount="0">
-     <VectorClassificationItemNg text="">
+    <LayerItem layerId="admin20130426130438992" userText="" style="hidden" text="admin" showFeatureCount="0">
+     <VectorClassificationItemNg userText="" text="">
       <symbols>
        <symbol alpha="1" type="fill" name="classificationSymbol">
         <layer pass="0" class="SimpleFill" locked="0">
@@ -172,7 +172,7 @@
      </VectorClassificationItemNg>
     </LayerItem>
    </Model>
-   <ComposerItem width="63" x="288" transparency="0" y="20" rotation="0" height="77.9" positionMode="0" frame="false" outlineWidth="0.3" zValue="3" lastValidViewScaleFactor="2.31356" uuid="{9ca6e49e-adb5-492b-a8dd-cad2dd029c2b}" id="" background="false" blendMode="0" positionLock="true">
+   <ComposerItem width="63" x="288" transparency="0" y="20" rotation="0" height="77.9" positionMode="0" frame="false" outlineWidth="0.3" zValue="3" lastValidViewScaleFactor="2.29084" uuid="{e4c7e5bd-4896-45c1-8ffa-28fd6d32d9b2}" id="" background="false" blendMode="0" positionLock="true">
     <FrameColor alpha="255" red="0" blue="0" green="0"/>
     <BackgroundColor alpha="255" red="255" blue="255" green="255"/>
    </ComposerItem>
@@ -194,7 +194,7 @@
    </overviewFrame>
    <Extent ymin="51.7066" xmin="81.7146" ymax="52.8647" xmax="83.2373"/>
    <LayerSet/>
-   <Grid gridStyle="0" crossLength="3" intervalX="0" offsetX="0" intervalY="0" offsetY="0" gridFrameStyle="0" gridFrameWidth="2" show="0">
+   <Grid gridStyle="0" crossLength="3" intervalX="0" offsetX="0" intervalY="0" offsetY="0" gridFrameStyle="0" gridFrameWidth="2" gridBlendMode="0" show="0">
     <symbol alpha="1" type="line" name="">
      <layer pass="0" class="SimpleLine" locked="0">
       <prop k="capstyle" v="flat"/>
@@ -210,9 +210,11 @@
       <prop k="width_unit" v="MM"/>
      </layer>
     </symbol>
-    <Annotation rightDirection="0" bottomDirection="0" format="0" topPosition="1" precision="3" leftDirection="0" rightPosition="1" bottomPosition="1" frameDistance="1" show="0" font="Droid Sans,9,-1,5,50,0,0,0,0,0" leftPosition="1" topDirection="0"/>
+    <Annotation rightDirection="0" bottomDirection="0" format="0" topPosition="1" precision="3" leftDirection="0" rightPosition="1" bottomPosition="1" frameDistance="1" show="0" font="Droid Sans,9,-1,5,50,0,0,0,0,0" leftPosition="1" topDirection="0">
+     <fontColor red="0" blue="0" green="0"/>
+    </Annotation>
    </Grid>
-   <ComposerItem width="284" x="0" transparency="0" y="20" rotation="0" height="216" positionMode="0" frame="false" outlineWidth="0.3" zValue="2" lastValidViewScaleFactor="2.31356" uuid="{9ec26141-6be0-4464-a5e0-3e2bf729f628}" id="" background="false" blendMode="0" positionLock="true">
+   <ComposerItem width="284" x="0" transparency="0" y="20" rotation="0" height="216" positionMode="0" frame="false" outlineWidth="0.3" zValue="2" lastValidViewScaleFactor="2.29084" uuid="{5009883a-5bd8-4919-ad24-cf676d204731}" id="" background="false" blendMode="0" positionLock="true">
     <FrameColor alpha="255" red="0" blue="0" green="0"/>
     <BackgroundColor alpha="255" red="255" blue="255" green="255"/>
    </ComposerItem>
@@ -220,7 +222,7 @@
   <ComposerLabel valign="128" labelText="[title]" htmlState="0" halign="4" margin="1">
    <LabelFont description="Droid Sans,18,-1,5,50,0,0,0,0,0"/>
    <FontColor red="0" blue="0" green="0"/>
-   <ComposerItem width="353" x="0" transparency="0" y="0" rotation="0" height="20" positionMode="0" frame="false" outlineWidth="0.3" zValue="1" lastValidViewScaleFactor="2.31356" uuid="{9e2a13fb-fa41-4c2d-a18a-db63b4130134}" id="" background="false" blendMode="0" positionLock="false">
+   <ComposerItem width="353" x="0" transparency="0" y="0" rotation="0" height="20" positionMode="0" frame="false" outlineWidth="0.3" zValue="1" lastValidViewScaleFactor="2.29084" uuid="{053af562-d4ba-4e39-a278-913821776b1e}" id="" background="true" blendMode="0" positionLock="true">
     <FrameColor alpha="255" red="0" blue="0" green="0"/>
     <BackgroundColor alpha="255" red="255" blue="255" green="255"/>
    </ComposerItem>
