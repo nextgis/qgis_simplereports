@@ -58,6 +58,8 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
     self.extent = None
     self.layers = None
 
+    self.btnMapTool.setIcon(QIcon(":/icons/selectaoi.png"))
+
     self.layerRegistry = QgsMapLayerRegistry.instance()
     self.layerRegistry.layerWasAdded.connect(self.__addLayer)
     self.layerRegistry.layerWillBeRemoved.connect(self.__removeLayer)

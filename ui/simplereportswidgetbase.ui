@@ -45,10 +45,6 @@
            <property name="text">
             <string>...</string>
            </property>
-           <property name="icon">
-            <iconset resource="../resources.qrc">
-             <normaloff>:/icons/selectaoi.png</normaloff>:/icons/selectaoi.png</iconset>
-           </property>
            <property name="checkable">
             <bool>true</bool>
            </property>
