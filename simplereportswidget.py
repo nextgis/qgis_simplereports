@@ -226,8 +226,7 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
     if not templateFile.open(QIODevice.ReadOnly | QIODevice.Text):
       QMessageBox.warning(self,
                           self.tr("Template load error"),
-                          self.tr("Cannot read load composition template from file:\n%1")
-                          .arg(templateFile.errorString())
+                          self.tr("Cannot read load composition template from file:\n%s") % (templateFile.errorString()
                          )
       return False
 
