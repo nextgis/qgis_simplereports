@@ -139,7 +139,7 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
     self.progressBar.setRange(0, len(layerNames) + 1)
 
     # generate map image
-    if not self.renderSchema():
+    if not self.renderSchema(layerNames):
       QMessageBox.warning(self,
                           self.tr("Image not found"),
                           self.tr("Cannot load schema map from temporary file")
@@ -221,7 +221,7 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
                            )
     self.mapTool.reset()
 
-  def renderSchema(self):
+  def renderSchema(self, selectedLayers):
     templateFile = QFile(":/resources/schema-graphics.qpt")
     if not templateFile.open(QIODevice.ReadOnly | QIODevice.Text):
       QMessageBox.warning(self,
@@ -258,6 +258,18 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
 
     composition = QgsComposition(self.canvas.mapRenderer())
     composition.loadFromTemplate(myTemplate, substitutions)
+
+    ln = []
+    for k, v in selectedLayers.iteritems():
+      ln.append(utils.getVectorLayerById(v).name())
+
+    legend = composition.getComposerItemById("Legend0")
+    legend.updateLegend()
+    lm = legend.model()
+    for r in xrange(lm.rowCount()):
+      i = lm.item(r, 0)
+      if i is not None and i.text() not in ln:
+        lm.removeRow(i.index().row(), i.index().parent())
 
     myMap = composition.getComposerMapById(0)
     myMap.setNewExtent(self.extent)
