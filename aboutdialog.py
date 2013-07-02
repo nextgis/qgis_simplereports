@@ -76,7 +76,7 @@ class AboutDialog(QDialog, Ui_Dialog):
   def getAboutText(self):
     return self.tr("""<p>Simple report generator.</p>
 <p>Plugin for generating simple reports for vector layers.</p>
-<p><strong>Developers</strong>: Alexander Bruy (<a href="http://nextgis.org">NextGIS</a>).</p>
+<p><strong>Developers</strong>: <a href="http://nextgis.org">NextGIS</a>.</p>
 <p><strong>Homepage</strong>: <a href="http://hub.qgis.org/projects/simplereports">http://hub.qgis.org/projects/simplereports</a></p>
 <p>Please report bugs at <a href="http://hub.qgis.org/projects/simplereports/issues">bugtracker</a></p>
 """)
