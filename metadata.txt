@@ -12,8 +12,8 @@ icon=icons/simplereports.png
 
 tags=vector,report
 
-homepage=http://hub.qgis.org/projects/simplereports
-tracker=http://hub.qgis.org/projects/simplereports/issues
+homepage=http://github.com/nextgis/simplereports
+tracker=https://github.com/nextgis/simplereports/issues
 repository=http://github.com/nextgis/simplereports
 
 experimental=True
