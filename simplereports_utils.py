@@ -25,35 +25,42 @@
 #
 #******************************************************************************
 
-from PyQt4.QtCore import *
+from builtins import str
+from qgis.core import QgsProject, QgsMapLayer, QgsLayerTree
 
-from qgis.core import *
 
-def getVectorLayers():
-  layerMap = QgsMapLayerRegistry.instance().mapLayers()
-  layers = dict()
-  for name, layer in layerMap.iteritems():
+def getVectorLayers():  
+  layerMap = QgsProject.instance().mapLayers() 
+  layers = dict()  
+  for name, layer in layerMap.items():
     if layer.type() == QgsMapLayer.VectorLayer:
-      if layer.id() not in layers.keys():
-        layers[layer.id()] = unicode(layer.name())
+      if layer.id() not in list(layers.keys()):
+        layers[layer.id()] = str(layer.name())        
   return layers
 
 def getVectorLayerById(layerId):
-  layerMap = QgsMapLayerRegistry.instance().mapLayers()
-  for name, layer in layerMap.iteritems():
+  layerMap = QgsProject.instance().mapLayers()
+  for name, layer in layerMap.items():
     if layer.type() == QgsMapLayer.VectorLayer and layer.id() == layerId:
       if layer.isValid():
         return layer
       else:
         return None
 
-def getLayerGroup(relations, layerId):
-  group = None
-
-  for item in relations:
-    group = unicode(item[0])
-    for lid in item[1]:
-      if unicode(lid) == unicode(layerId):
-        return group
-
-  return group
+def getLayerGroup(relations, lay) -> list:  
+  layerId = lay[0]  
+  node = relations.findLayer(layerId) 
+  group = []
+  if (node == None): 
+    return group
+  else:
+    group.append(node.name())
+    findNodes(group, node)
+    return group
+def findNodes(group, node):
+    parent = node.parent()
+    if type(parent) == QgsLayerTree:
+        return
+    else:
+        group.append(parent.name())        
+        findNodes(group, parent)
