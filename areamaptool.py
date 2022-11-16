@@ -25,10 +25,10 @@
 #
 #******************************************************************************
 
-from PyQt4.QtCore import *
+from qgis.PyQt.QtCore import pyqtSignal, Qt
 
-from qgis.core import *
-from qgis.gui import *
+from qgis.core import QgsPointXY, QgsRectangle, QgsWkbTypes
+from qgis.gui import QgsMapToolEmitPoint, QgsRubberBand, QgsMapTool
 
 class AreaMapTool(QgsMapToolEmitPoint):
 
@@ -39,7 +39,7 @@ class AreaMapTool(QgsMapToolEmitPoint):
     self.canvas = canvas
     QgsMapToolEmitPoint.__init__(self, self.canvas)
 
-    self.rubberBand = QgsRubberBand(self.canvas, QGis.Polygon)
+    self.rubberBand = QgsRubberBand(self.canvas, QgsWkbTypes.GeometryType.PolygonGeometry)
     self.rubberBand.setColor(Qt.red)
     self.rubberBand.setWidth(1)
 
@@ -49,7 +49,7 @@ class AreaMapTool(QgsMapToolEmitPoint):
     self.startPoint = self.endPoint = None
     self.isEmittingPoint = False
     if clear:
-      self.rubberBand.reset(QGis.Polygon)
+      self.rubberBand.reset(QgsWkbTypes.GeometryType.PolygonGeometry)
 
   def canvasPressEvent(self, e):
     self.reset()
@@ -72,20 +72,20 @@ class AreaMapTool(QgsMapToolEmitPoint):
     self.showRect(self.startPoint, self.endPoint)
 
   def showRect(self, startPoint, endPoint):
-    self.rubberBand.reset(QGis.Polygon)
+    self.rubberBand.reset(QgsWkbTypes.GeometryType.PolygonGeometry)
     if startPoint.x() == endPoint.x() or startPoint.y() == endPoint.y():
       return
 
-    point1 = QgsPoint(startPoint.x(), startPoint.y())
-    point2 = QgsPoint(startPoint.x(), endPoint.y())
-    point3 = QgsPoint(endPoint.x(), endPoint.y())
-    point4 = QgsPoint(endPoint.x(), startPoint.y())
+    point1 = QgsPointXY(startPoint.x(), startPoint.y())
+    point2 = QgsPointXY(startPoint.x(), endPoint.y())
+    point3 = QgsPointXY(endPoint.x(), endPoint.y())
+    point4 = QgsPointXY(endPoint.x(), startPoint.y())
 
     self.rubberBand.addPoint(point1, False)
     self.rubberBand.addPoint(point2, False)
     self.rubberBand.addPoint(point3, False)
     self.rubberBand.addPoint(point4, True)  # true to update canvas
-    self.rubberBand.show()
+    self.rubberBand.show()    
 
   def rectangle(self):
     if self.startPoint == None or self.endPoint == None:
@@ -102,9 +102,10 @@ class AreaMapTool(QgsMapToolEmitPoint):
     if rect == None:
       self.reset()
     else:
-      self.startPoint = QgsPoint(rect.xMaximum(), rect.yMaximum())
-      self.endPoint = QgsPoint(rect.xMinimum(), rect.yMinimum())
+      self.startPoint = QgsPointXY(rect.xMaximum(), rect.yMaximum())
+      self.endPoint = QgsPointXY(rect.xMinimum(), rect.yMinimum())
       self.showRect(self.startPoint, self.endPoint)
+    
     return True
 
   def deactivate(self):

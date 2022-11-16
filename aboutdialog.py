@@ -25,16 +25,22 @@
 #
 #******************************************************************************
 
+from future import standard_library
+
+standard_library.install_aliases()
+import configparser
 import os
-import ConfigParser
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from qgis.PyQt import uic
+from qgis.PyQt.QtGui import QPixmap, QTextDocument
+from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox
 
-from .ui.ui_aboutdialogbase import Ui_Dialog
+Ui_Dialog, _ = uic.loadUiType(os.path.join(
+    os.path.dirname(__file__), 'ui/aboutdialogbase.ui'))
+icons_path = os.path.join(
+    os.path.dirname(__file__), 'icons/')
 
-import resources_rc
-
+    
 class AboutDialog(QDialog, Ui_Dialog):
   def __init__(self):
     QDialog.__init__(self)
@@ -42,9 +48,9 @@ class AboutDialog(QDialog, Ui_Dialog):
 
     self.btnHelp = self.buttonBox.button(QDialogButtonBox.Help)
 
-    self.lblLogo.setPixmap(QPixmap(":/icons/simplereports.png"))
+    self.lblLogo.setPixmap(QPixmap(icons_path + "simplereports.png"))
 
-    cfg = ConfigParser.SafeConfigParser()
+    cfg = configparser.SafeConfigParser()
     cfg.read(os.path.join(os.path.dirname(__file__), "metadata.txt"))
     version = cfg.get("general", "version")
     self.lblVersion.setText(self.tr("Version: %s") % (version))

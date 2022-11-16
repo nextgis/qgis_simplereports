@@ -25,26 +25,34 @@
 #
 #******************************************************************************
 
-import locale
-import operator
+import os
+from builtins import range, str
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from PyQt4.QtXml import *
+from qgis.core import (QgsFeature, QgsFeatureRequest, QgsLayout,
+                       QgsMapSettings, QgsProject,
+                       QgsReadWriteContext, QgsLayoutExporter)
+from qgis.gui import QgsDockWidget
+from qgis.PyQt import uic
+from qgis.PyQt.QtCore import QFile, QIODevice, QSettings, Qt, QCoreApplication, QDir
+from qgis.PyQt.QtGui import QDoubleValidator, QIcon
+from qgis.PyQt.QtWidgets import QMessageBox, QFileDialog, QTreeWidgetItem
+from qgis.PyQt.QtXml import QDomDocument
 
-from qgis.core import *
+from . import areamaptool, odftools
+from . import simplereports_utils as utils
 
-import areamaptool
-import odftools
-import simplereports_utils as utils
 
-from .ui.ui_simplereportswidgetbase import Ui_DockWidget
+Ui_DockWidget, _ = uic.loadUiType(os.path.join(
+    os.path.dirname(__file__), 'ui/simplereportswidgetbase.ui'))
+resources_path = os.path.join(
+    os.path.dirname(__file__), 'resources/')
+icons_path = os.path.join(
+    os.path.dirname(__file__), 'icons/')
 
-import resources_rc
 
-class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
+class SimpleReportsDockWidget(QgsDockWidget, Ui_DockWidget):
   def __init__(self, plugin):
-    QDockWidget.__init__(self, None)
+    QgsDockWidget.__init__(self, None)
     self.setupUi(self)
 
     self.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
@@ -58,10 +66,11 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
     self.extent = None
     self.layers = None
 
-    self.btnMapTool.setIcon(QIcon(":/icons/selectaoi.png"))
+    self.btnMapTool.setIcon(QIcon(icons_path + "selectaoi.png"))
 
-    self.layerRegistry = QgsMapLayerRegistry.instance()
-    self.layerRegistry.layerWasAdded.connect(self.__addLayer)
+    self.layerRegistry = QgsProject.instance()
+    self.layerRegistry.layerTreeRoot().addedChildren.connect(self.__addLayer)   
+    
     self.layerRegistry.layerWillBeRemoved.connect(self.__removeLayer)
     self.canvas.extentsChanged.connect(self.__updateExtents)
 
@@ -110,7 +119,7 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
     settings = QSettings("NextGIS", "SimpleReports")
     lastDirectory = settings.value("lastReportDir",  ".")
 
-    fName = QFileDialog.getSaveFileName(self,
+    fName, __ = QFileDialog.getSaveFileName(self,
                                         self.tr("Save file"),
                                         lastDirectory,
                                         self.tr("OpenDocument Text (*.odt *.ODT)")
@@ -121,7 +130,7 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
     if not fName.lower().endswith(".odt"):
       fName += ".odt"
 
-    templateFile = QFile(":/resources/schema-template.odt")
+    templateFile = QFile(resources_path + "schema-template.odt")
     if templateFile.open(QIODevice.ReadOnly):
       outFile = QFile(fName)
       if outFile.open(QIODevice.WriteOnly):
@@ -131,7 +140,7 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
 
     # get selected layers
     layerNames = dict()
-    for i in xrange(self.lstLayers.topLevelItemCount()):
+    for i in range(self.lstLayers.topLevelItemCount()):
       item = self.lstLayers.topLevelItem(i)
       if item.checkState(0) == Qt.Checked:
         layerNames[item.text(0)] = item.data(0, Qt.UserRole)
@@ -151,7 +160,7 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
 
     # open template
     writer = odftools.ODFWriter()
-    writer.setFileName(unicode(fName))
+    writer.setFileName(str(fName))
     writer.openFile()
 
     parser = odftools.ODFParser()
@@ -169,41 +178,49 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
 
     # create attribute table for each layer
     f = QgsFeature()
-    for k, v in layerNames.iteritems():
-      layer = utils.getVectorLayerById(v)
-      myAttrs = dict()
-      attrNames = []
-      for i in xrange(len(layer.pendingAllAttributesList())):
-        if layer.editType(i) != QgsVectorLayer.Hidden:
-          myAttrs[i] = layer.attributeDisplayName(i)
-          attrNames.append(layer.pendingFields()[i].name())
+    for k, v in list(layerNames.items()):
+      # Take only VectorLayers
+      if utils.getVectorLayerById(v) != None:
+        layer = utils.getVectorLayerById(v)
+        myAttrs = dict()
+        attrNames = []        
+        for i in range(len(layer.attributeList())):        
+          edit_conf = layer.editFormConfig()
+          if not edit_conf.readOnly(i):
+            myAttrs[i] = layer.attributeDisplayName(i)            
+            attrNames.append(layer.fields()[i].name())
 
-      tableTitle = parser.addParagraph(k)
-      table = parser.addTable(k, len(myAttrs))
+        tableTitle = parser.addParagraph(k)
+        table = parser.addTable(k, len(myAttrs))
 
-      # table header
-      parser.addTableRow(table, myAttrs.values())
+        # table header
+        parser.addTableRow(table, list(myAttrs.values()))
 
-      # table data
-      request = QgsFeatureRequest()
-      request.setFilterRect(self.canvas.mapRenderer().mapToLayerCoordinates(layer, self.extent))
-      request.setFlags(QgsFeatureRequest.NoGeometry)
-      request.setSubsetOfAttributes(myAttrs.keys())
-      fit = layer.getFeatures(request)
-      while fit.nextFeature(f):
-        attrs = f.attributes()
-        tmp = []
-        for i in myAttrs.keys():
-          tmp.append(attrs[i])
-        parser.addTableRow(table, tmp)
+        # table data
+        request = QgsFeatureRequest()        
+        if self.mapTool.rectangle() != None:
+          request.setFilterRect(QgsMapSettings.mapToLayerCoordinates(QgsMapSettings(), layer, self.mapTool.rectangle()))
+          self.mapTool.rectangle()
+        else:
+          request.setFilterRect(QgsMapSettings.mapToLayerCoordinates(QgsMapSettings(), layer, self.extent))          
+          self.mapTool.rectangle()
+        request.setFlags(QgsFeatureRequest.NoGeometry)
+        request.setSubsetOfAttributes(list(myAttrs.keys()))
+        fit = layer.getFeatures(request)
+        while fit.nextFeature(f):
+          attrs = f.attributes()
+          tmp = []
+          for i in list(myAttrs.keys()):
+            tmp.append(attrs[i])
+          parser.addTableRow(table, tmp)
 
-      # write table to file
-      te.insertBefore(tableTitle, tp)
-      te.insertBefore(table, tp)
-      te.insertBefore(parser.addParagraph(""), tp)
+        # write table to file
+        te.insertBefore(tableTitle, tp)
+        te.insertBefore(table, tp)
+        te.insertBefore(parser.addParagraph(""), tp)
 
-      self.progressBar.setValue(self.progressBar.value() + 1)
-      QCoreApplication.processEvents()
+        self.progressBar.setValue(self.progressBar.value() + 1)
+        QCoreApplication.processEvents()
 
     # remove placeholder
     te.removeChild(tp)
@@ -222,7 +239,7 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
     self.mapTool.reset()
 
   def renderSchema(self, selectedLayers):
-    templateFile = QFile(":/resources/schema-graphics.qpt")
+    templateFile = QFile(resources_path + "schema-graphics.qpt")
     if not templateFile.open(QIODevice.ReadOnly | QIODevice.Text):
       QMessageBox.warning(self,
                           self.tr("Template load error"),
@@ -244,38 +261,48 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
     templateFile.close()
 
     # prepare composition
-    renderer = QgsMapRenderer()
-
-    layers = []
-    for layer in self.canvas.layers():
-      layers.append(unicode(layer.id()))
-
-    # substitutions
-    substitutions = {"title" : "QGIS"}
-    if self.leTitle.text() != "":
-      substitutions["title"] = self.leTitle.text()
-
-    composition = QgsComposition(self.canvas.mapRenderer())
-    composition.loadFromTemplate(myTemplate, substitutions)
+    myTemplate.elementsByTagName('ComposerLabel').at(0).toElement().setAttribute('labelText', 'QGIS')
+    if self.leTitle.text() != "":      
+      myTemplate.elementsByTagName('ComposerLabel').at(0).toElement().setAttribute('labelText', self.leTitle.text())    
+    composition = QgsLayout(QgsProject.instance())
+    ctx = QgsReadWriteContext()
+    composition.loadFromTemplate(myTemplate, ctx)
 
     ln = []
-    for k, v in selectedLayers.iteritems():
-      ln.append(utils.getVectorLayerById(v).name())
+    for _, v in list(selectedLayers.items()):
+      #take only vectorLayers
+      if utils.getVectorLayerById(v) != None:
+        ln.append(utils.getVectorLayerById(v).name())
 
-    legend = composition.getComposerItemById("Legend0")
-    legend.updateLegend()
-    lm = legend.model()
-    for r in xrange(lm.rowCount()):
-      i = lm.item(r, 0)
-      if i is not None and i.text() not in ln:
-        lm.removeRow(i.index().row(), i.index().parent())
-
-    myMap = composition.getComposerMapById(0)
-    myMap.setNewExtent(self.extent)
+    legend = composition.itemById("Legend0")
+    legend.updateLegend()   
+######SKIPPED####### 
+    # lm = composition.itemsModel()
+    # for r in range(lm.rowCount()):      
+    #   modelIndex = lm.indexForItem(legend,0)
+    #   i = lm.itemFromIndex(modelIndex)
+    #   if i is not None and i.wrapString() not in ln:
+    #     # lm.removeRow(i.index().row(), i.index().parent())
+    #     print(lm,i)
+    #     # lm.removeLayoutItem(i)
+    #     # lm.removeRows( row: int, count: int, parent: lm.indexForItem(i)) 
+    #     # print(lm,i)
+    # #######################################bak
+    
+    # legend = composition.getComposerItemById("Legend0")
+    # legend.updateLegend()
+    # lm = legend.model()
+    # for r in range(lm.rowCount()):
+    #   i = lm.item(r, 0)
+    #   if i is not None and i.text() not in ln:
+    #     lm.removeRow(i.index().row(), i.index().parent())    
+##########################################################    
+    myMap = composition.referenceMap()    
+    myMap.setExtent(self.extent)
     if self.leScale.text() != "":
-      myMap.setNewScale(float(self.leScale.text()))
-    img = composition.printPageAsRaster(0)
-    img.save(QDir.tempPath() + "/schema-test.png")
+      myMap.setScale(float(self.leScale.text()))
+    exporter = QgsLayoutExporter(composition)    
+    exporter.exportToImage(QDir.tempPath() + "/schema-test.png", QgsLayoutExporter.ImageExportSettings())    
     return True
 
   def resetMapTool(self, clear=False):
@@ -288,9 +315,11 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
     self.extent = self.mapTool.rectangle()
 
   def __addLayer(self, layer):
-    if layer.id() not in self.layers.keys():
-      self.layers[layer.id()] = unicode(layer.name())
-      self.__updateLayers()
+    for fli in layer.findLayerIds():
+      if fli not in list(self.layers.keys()):
+        self.layers[fli] = str(layer.findLayer(fli))  
+        self.__updateLayers()
+    
 
   def __removeLayer(self, layerId):
     del self.layers[layerId]
@@ -304,22 +333,20 @@ class SimpleReportsDockWidget(QDockWidget, Ui_DockWidget):
       self.lstLayers.clear()
       return
 
-    relations = self.iface.legendInterface().groupLayerRelationship()
-
+    relations = self.layerRegistry.layerTreeRoot()        
+    
     self.lstLayers.blockSignals(True)
     self.lstLayers.clear()
-    for lay in sorted(self.layers.iteritems(), cmp=locale.strcoll, key=operator.itemgetter(1)):
-      group = utils.getLayerGroup(relations, lay[0])
-
-      item = QTreeWidgetItem(self.lstLayers)
-      if (group is not None) and (group != ""):
-        item.setText(0, "%s - %s" % (lay[1], group))
-      else:
-        item.setText(0, lay[1])
+    
+    for lay in sorted(iter(list(self.layers.items()))):      
+      group = utils.getLayerGroup(relations, lay)      
+      item = QTreeWidgetItem(self.lstLayers)      
+      item.setText(0, (" / ").join(group))
       item.setData(0, Qt.UserRole, lay[0])
       item.setCheckState(0, Qt.Unchecked)
     self.lstLayers.blockSignals(False)
-
+    self.layerRegistry.reloadAllLayers()
+    
   def __updateExtents(self):
     if not self.rbExtentUser.isChecked():
       self.extent = self.canvas.extent()

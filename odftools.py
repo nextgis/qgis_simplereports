@@ -25,11 +25,11 @@
 #
 #******************************************************************************
 
+from builtins import str
 import zipfile
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from PyQt4.QtXml import *
+from qgis.PyQt.QtCore import QObject
+from qgis.PyQt.QtXml import QDomDocument
 
 from qgis.core import *
 
@@ -80,10 +80,10 @@ class ODFParser(QObject):
     self.manifest.setContent(text)
 
   def getContent(self):
-    return unicode(self.content.toString())
+    return str(self.content.toString())
 
   def getManifest(self):
-    return unicode(self.manifest.toString())
+    return str(self.manifest.toString())
 
   def addPictureToManifest(self, imgName):
     root = self.manifest.documentElement()
@@ -97,7 +97,7 @@ class ODFParser(QObject):
   def substitute(self, substitutions):
     if len(substitutions) > 0:
       xmlString = self.content.toString()
-      for k, v in substitutions.iteritems():
+      for k, v in list(substitutions.items()):
         xmlString = xmlString.replace(k, self.encodeStringForXML(v))
 
       success, errorString, errorLine, errorColumn = self.content.setContent(xmlString, True)
@@ -107,7 +107,7 @@ class ODFParser(QObject):
     return True
 
   def encodeStringForXML(self, string):
-    modifiedString = string
+    modifiedStr = string
     modifiedStr.replace("&", "&amp;")
     modifiedStr.replace("\"", "&quot;") # maybe \&quot; ?
     modifiedStr.replace("'", "&apos;")
@@ -181,8 +181,8 @@ class ODFParser(QObject):
         drawFrame.setAttribute("draw:style-name", "fr1")
         drawFrame.setAttribute("draw:name", imgName)
         drawFrame.setAttribute("text:anchor-type", "paragraph")
-        drawFrame.setAttribute("svg:width", unicode(width) + "cm")
-        drawFrame.setAttribute("svg:height", unicode(height) + "cm")
+        drawFrame.setAttribute("svg:width", str(width) + "cm")
+        drawFrame.setAttribute("svg:height", str(height) + "cm")
         drawFrame.setAttribute("draw:z-index", 0)
 
         drawImage = drawFrame.ownerDocument().createElement("draw:image")
@@ -207,7 +207,7 @@ class ODFParser(QObject):
 
     paragraphBody = textBody.ownerDocument().createElement("text:p")
     paragraphSpan = paragraphBody.ownerDocument().createElement("text:span")
-    paragraphValue = paragraphSpan.ownerDocument().createTextNode(unicode(text))
+    paragraphValue = paragraphSpan.ownerDocument().createTextNode(str(text))
 
     if len(text) > 0:
       paragraphSpan.appendChild(paragraphValue)
@@ -242,7 +242,7 @@ class ODFParser(QObject):
       if d is None:
         cellValue = cellContentSpan.ownerDocument().createTextNode("")
       else:
-        cellValue = cellContentSpan.ownerDocument().createTextNode(unicode(d))
+        cellValue = cellContentSpan.ownerDocument().createTextNode(str(d))
 
       cellContentSpan.appendChild(cellValue)
       cellContentParagraph.appendChild(cellContentSpan)

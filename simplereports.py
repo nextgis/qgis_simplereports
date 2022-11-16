@@ -25,27 +25,36 @@
 #
 #******************************************************************************
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from __future__ import absolute_import
+from builtins import str
+from builtins import object
+import os
+from qgis.PyQt.QtCore import QFileInfo, QSettings, QLocale, QTranslator, QCoreApplication, Qt
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtWidgets import QAction, QMessageBox
 
 from qgis.core import *
 
-import simplereportswidget
-import aboutdialog
+from . import simplereportswidget
+from . import aboutdialog
 
-import resources_rc
 
-class SimpleReportsPlugin:
+resources_path = os.path.join(
+    os.path.dirname(__file__), 'resources/')
+icons_path = os.path.join(
+    os.path.dirname(__file__), 'icons/')
+    
+class SimpleReportsPlugin(object):
   def __init__(self, iface):
     self.iface = iface
 
     try:
-      self.QgisVersion = unicode(QGis.QGIS_VERSION_INT)
+      self.QgisVersion = str(Qgis.QGIS_VERSION_INT)
     except:
-      self.QgisVersion = unicode(QGis.qgisVersion)[ 0 ]
+      self.QgisVersion = str(Qgis.qgisVersion)[ 0 ]
 
     # For i18n support
-    userPluginPath = QFileInfo(QgsApplication.qgisUserDbFilePath()).path() + "/python/plugins/simplereports"
+    userPluginPath = QFileInfo(QgsApplication.qgisUserDatabaseFilePath()).path() + "/python/plugins/simplereports"
     systemPluginPath = QgsApplication.prefixPath() + "/python/plugins/simplereports"
 
     overrideLocale = QSettings().value("locale/overrideFlag", False)
@@ -78,11 +87,11 @@ class SimpleReportsPlugin:
     self.dockWidget = None
 
     self.actionDock = QAction(QCoreApplication.translate("SimpleReports", "SimpleReports"), self.iface.mainWindow())
-    self.actionDock.setIcon(QIcon(":/icons/simplereports.png"))
+    self.actionDock.setIcon(QIcon(icons_path + "simplereports.png"))
     self.actionDock.setWhatsThis("Simple report generator")
     self.actionDock.setCheckable(True)
     self.actionAbout = QAction(QCoreApplication.translate("SimpleReports", "About SimpleReports..."), self.iface.mainWindow())
-    self.actionAbout.setIcon(QIcon(":/icons/about.png"))
+    self.actionAbout.setIcon(QIcon(icons_path + "about.png"))
     self.actionAbout.setWhatsThis("About SimpleReports")
 
     self.iface.addPluginToMenu(QCoreApplication.translate("SimpleReports", "SimpleReports"), self.actionDock)
