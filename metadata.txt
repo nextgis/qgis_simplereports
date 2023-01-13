@@ -1,6 +1,7 @@
 [general]
 name=SimpleReports
 description=Simple report generator
+about=Intersect a given area with layers and produce an OpenOffice ODT report. Developed by NextGIS. Any feedback is welcome at https://nextgis.com/contact
 category=Plugins
 version=0.3.0
 qgisMinimumVersion=3.4
