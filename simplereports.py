@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#******************************************************************************
+# ******************************************************************************
 #
 # SimpleReports
 # ---------------------------------------------------------
@@ -23,112 +23,123 @@
 # to the Free Software Foundation, 51 Franklin Street, Suite 500 Boston,
 # MA 02110-1335 USA.
 #
-#******************************************************************************
+# ******************************************************************************
 
 from __future__ import absolute_import
 from builtins import str
 from builtins import object
 import os
+from os import path
 from qgis.PyQt.QtCore import QFileInfo, QSettings, QLocale, QTranslator, QCoreApplication, Qt
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QMessageBox
 
 from qgis.core import *
+from qgis.core import QgsApplication
 
 from . import simplereportswidget
-from . import aboutdialog
-
+from . import about_dialog
 
 resources_path = os.path.join(
     os.path.dirname(__file__), 'resources/')
 icons_path = os.path.join(
     os.path.dirname(__file__), 'icons/')
-    
+
+
 class SimpleReportsPlugin(object):
-  def __init__(self, iface):
-    self.iface = iface
+    def __init__(self, iface):
+        self.iface = iface
+        self.plugin_dir = os.path.dirname(__file__)
+        self._translator = None
+        try:
+            self.QgisVersion = str(Qgis.QGIS_VERSION_INT)
+        except:
+            self.QgisVersion = str(Qgis.qgisVersion)[0]
 
-    try:
-      self.QgisVersion = str(Qgis.QGIS_VERSION_INT)
-    except:
-      self.QgisVersion = str(Qgis.qgisVersion)[ 0 ]
+        # For i18n support
+        userPluginPath = QFileInfo(QgsApplication.qgisUserDatabaseFilePath()).path() + "/python/plugins/simplereports"
+        systemPluginPath = QgsApplication.prefixPath() + "/python/plugins/simplereports"
 
-    # For i18n support
-    userPluginPath = QFileInfo(QgsApplication.qgisUserDatabaseFilePath()).path() + "/python/plugins/simplereports"
-    systemPluginPath = QgsApplication.prefixPath() + "/python/plugins/simplereports"
+        overrideLocale = QSettings().value("locale/overrideFlag", False)
+        if not overrideLocale:
+            localeFullName = QLocale.system().name()
+        else:
+            localeFullName = QSettings().value("locale/userLocale", "")
 
-    overrideLocale = QSettings().value("locale/overrideFlag", False)
-    if not overrideLocale:
-      localeFullName = QLocale.system().name()
-    else:
-      localeFullName = QSettings().value("locale/userLocale", "")
+        if QFileInfo(userPluginPath).exists():
+            translationPath = userPluginPath + "/i18n/simplereports_" + localeFullName + ".qm"
+        else:
+            translationPath = systemPluginPath + "/i18n/simplereports_" + localeFullName + ".qm"
 
-    if QFileInfo(userPluginPath).exists():
-      translationPath = userPluginPath + "/i18n/simplereports_" + localeFullName + ".qm"
-    else:
-      translationPath = systemPluginPath + "/i18n/simplereports_" + localeFullName + ".qm"
+        self.localePath = translationPath
+        self.translator = QTranslator()
+        self.translator.load(self.localePath)
+        QCoreApplication.installTranslator(self.translator)
+        # if QFileInfo(self.localePath).exists():
 
-    self.localePath = translationPath
-    if QFileInfo(self.localePath).exists():
-      self.translator = QTranslator()
-      self.translator.load(self.localePath)
-      QCoreApplication.installTranslator(self.translator)
+    def initGui(self):
+        print(__class__.__name__)
+        if int(self.QgisVersion) < 10900:
+            qgisVersion = str(self.QgisVersion[0]) + "." + str(self.QgisVersion[2]) + "." + str(self.QgisVersion[3])
+            QMessageBox.warning(self.iface.mainWindow(),
+                                self.tr("Error"),
+                                self.tr("Quantum GIS %s detected.\n") % (
+                                    qgisVersion) +
+                                self.tr(
+                                    "This version of SimpleReports requires at least QGIS version 2.0. Plugin will not be enabled.")
+                                )
+            return None
 
-  def initGui(self):
-    if int(self.QgisVersion) < 10900:
-      qgisVersion = str(self.QgisVersion[ 0 ]) + "." + str(self.QgisVersion[ 2 ]) + "." + str(self.QgisVersion[ 3 ])
-      QMessageBox.warning(self.iface.mainWindow(),
-                           QCoreApplication.translate("SimpleReports", "Error"),
-                           QCoreApplication.translate("SimpleReports", "Quantum GIS %s detected.\n") % (qgisVersion) +
-                           QCoreApplication.translate("SimpleReports", "This version of SimpleReports requires at least QGIS version 2.0. Plugin will not be enabled."))
-      return None
+        self.dockWidget = None
 
+        self.actionDock = QAction(self.tr("SimpleReports"), self.iface.mainWindow())
+        self.actionDock.setIcon(QIcon(icons_path + "simplereports.png"))
+        self.actionDock.setWhatsThis("Simple report generator")
+        self.actionDock.setCheckable(True)
+        self.actionAbout = QAction(
+            self.tr("About..."), self.iface.mainWindow()
+        )
+        self.actionAbout.setIcon(QIcon(icons_path + "about.png"))
+        self.actionAbout.setWhatsThis("About SimpleReports")
 
-    self.dockWidget = None
+        self.iface.addPluginToMenu(self.tr("SimpleReports"), self.actionDock)
+        self.iface.addPluginToMenu(self.tr("SimpleReports"), self.actionAbout)
+        self.iface.addToolBarIcon(self.actionDock)
 
-    self.actionDock = QAction(QCoreApplication.translate("SimpleReports", "SimpleReports"), self.iface.mainWindow())
-    self.actionDock.setIcon(QIcon(icons_path + "simplereports.png"))
-    self.actionDock.setWhatsThis("Simple report generator")
-    self.actionDock.setCheckable(True)
-    self.actionAbout = QAction(QCoreApplication.translate("SimpleReports", "About SimpleReports..."), self.iface.mainWindow())
-    self.actionAbout.setIcon(QIcon(icons_path + "about.png"))
-    self.actionAbout.setWhatsThis("About SimpleReports")
+        self.actionDock.triggered.connect(self.showHideDockWidget)
+        self.actionAbout.triggered.connect(self.about)
 
-    self.iface.addPluginToMenu(QCoreApplication.translate("SimpleReports", "SimpleReports"), self.actionDock)
-    self.iface.addPluginToMenu(QCoreApplication.translate("SimpleReports", "SimpleReports"), self.actionAbout)
-    self.iface.addToolBarIcon(self.actionDock)
+        # create dockwidget
+        self.dockWidget = simplereportswidget.SimpleReportsDockWidget(self)
+        self.iface.addDockWidget(Qt.LeftDockWidgetArea, self.dockWidget)
+        self.dockWidget.visibilityChanged.connect(self.__dockVisibilityChanged)
 
-    self.actionDock.triggered.connect(self.showHideDockWidget)
-    self.actionAbout.triggered.connect(self.about)
+    def unload(self):
+        self.iface.removeToolBarIcon(self.actionDock)
+        self.iface.removePluginMenu(self.tr("SimpleReports"), self.actionDock)
+        self.iface.removePluginMenu(self.tr("SimpleReports"), self.actionAbout)
 
-    # create dockwidget
-    self.dockWidget = simplereportswidget.SimpleReportsDockWidget(self)
-    self.iface.addDockWidget(Qt.LeftDockWidgetArea, self.dockWidget)
-    self.dockWidget.visibilityChanged.connect(self.__dockVisibilityChanged)
+        # remove dock widget
+        self.dockWidget.close()
+        del self.dockWidget
+        self.dockWidget = None
 
-  def unload(self):
-    self.iface.removeToolBarIcon(self.actionDock)
-    self.iface.removePluginMenu(QCoreApplication.translate("SimpleReports", "SimpleReports"), self.actionDock)
-    self.iface.removePluginMenu(QCoreApplication.translate("SimpleReports", "SimpleReports"), self.actionAbout)
+    def showHideDockWidget(self):
+        if self.dockWidget.isVisible():
+            self.dockWidget.hide()
+        else:
+            self.dockWidget.show()
 
-    # remove dock widget
-    self.dockWidget.close()
-    del self.dockWidget
-    self.dockWidget = None
+    def about(self):
+        dialog = about_dialog.AboutDialog(os.path.basename(self.plugin_dir))
+        dialog.exec_()
 
-  def showHideDockWidget(self):
-    if self.dockWidget.isVisible():
-      self.dockWidget.hide()
-    else:
-      self.dockWidget.show()
+    def __dockVisibilityChanged(self):
+        if self.dockWidget.isVisible():
+            self.actionDock.setChecked(True)
+        else:
+            self.actionDock.setChecked(False)
+            self.dockWidget.resetMapTool()
 
-  def about(self):
-    d = aboutdialog.AboutDialog()
-    d.exec_()
-
-  def __dockVisibilityChanged(self):
-    if self.dockWidget.isVisible():
-      self.actionDock.setChecked(True)
-    else:
-      self.actionDock.setChecked(False)
-      self.dockWidget.resetMapTool()
+    def tr(self, message):
+        return QCoreApplication.translate(__class__.__name__, message)

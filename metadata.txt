@@ -1,7 +1,9 @@
 [general]
 name=SimpleReports
 description=Simple report generator
+description[ru]=Простой генератор отчетов
 about=Intersect a given area with layers and produce an OpenOffice ODT report. Developed by NextGIS. Any feedback is welcome at https://nextgis.com/contact
+about[ru]=Пересеките заданную область слоями и создайте отчет OpenOffice ODT. Разработан компанией NextGIS. Любые отзывы приветствуются на https://nextgis.com/contact.
 category=Plugins
 version=0.3.0
 qgisMinimumVersion=3.4
@@ -16,6 +18,9 @@ tags=vector,report
 homepage=http://github.com/nextgis/simplereports
 tracker=https://github.com/nextgis/simplereports/issues
 repository=http://github.com/nextgis/simplereports
+
+video=Not yet
+video[ru]=Пока нет
 
 experimental=True
 deprecated=False
