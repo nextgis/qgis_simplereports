@@ -13,6 +13,10 @@ RES_FILES=$(patsubst $(RES_PATH)/%.qrc, $(RES_PATH)/%_rc.py, $(RES_SOURCES))
 PRO_PATH=.
 PRO_FILES=$(wildcard $(PRO_PATH)/*.pro)
 
+TS_PATH=i18n
+TS_FILE_RU=$(TS_PATH)/simplereports_ru.ts
+TS_FILE_PT=$(TS_PATH)/simplereports_pt.ts
+
 ALL_FILES= ${RES_FILES} ${UI_FILES} ${LANG_FILES}
 
 all: $(ALL_FILES)
@@ -23,6 +27,10 @@ ts: $(PRO_FILES)
 	pylupdate4 -verbose $<
 
 lang: $(LANG_FILES)
+
+compile_ts:
+	lrelease $(TS_FILE_RU)
+	lrelease $(TS_FILE_PT)
 
 res: $(RES_FILES)
 
@@ -40,9 +48,12 @@ clean:
 	find -name "*.pyc" -exec rm -f {} \;
 	rm -f *.zip
 
-package:
-	cd .. && rm -f *.zip && zip -r simplereports.zip simplereports -x \*.pyc \*.ts \*.ui \*.qrc \*.pro \*~ \*.git\* \*Makefile*
+zip:
+	cd .. && rm -f *.zip && zip -r simplereports.zip simplereports -x \*.pyc \*.ts \*.qrc \*.pro \*~ \*.git\* \*Makefile*
 	mv ../simplereports.zip .
+
+package: compile_ts zip
+	rm $(TS_PATH)/*.qm
 
 upload:
 	plugin_uploader.py simplereports.zip
