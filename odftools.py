@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#******************************************************************************
+# ******************************************************************************
 #
 # SimpleReports
 # ---------------------------------------------------------
@@ -23,7 +23,7 @@
 # to the Free Software Foundation, 51 Franklin Street, Suite 500 Boston,
 # MA 02110-1335 USA.
 #
-#******************************************************************************
+# ******************************************************************************
 
 from builtins import str
 import zipfile
@@ -33,228 +33,253 @@ from qgis.PyQt.QtXml import QDomDocument
 
 from qgis.core import *
 
+
 class ODFWriter(QObject):
-  def __init__(self, parent=None):
-    QObject.__init__(self)
+    def __init__(self, parent=None):
+        QObject.__init__(self)
 
-    self.fileName = None
-    self.odfFile = None
-    self.fileList = None
+        self.fileName = None
+        self.odfFile = None
+        self.fileList = None
 
-  def setFileName(self, fileName):
-    self.fileName = fileName
+    def setFileName(self, fileName):
+        self.fileName = fileName
 
-  def openFile(self):
-    self.odfFile = zipfile.ZipFile(self.fileName, "a")
-    self.fileList = self.odfFile.infolist()
+    def openFile(self):
+        self.odfFile = zipfile.ZipFile(self.fileName, "a")
+        self.fileList = self.odfFile.infolist()
 
-  def closeFile(self):
-    self.odfFile.close()
+    def closeFile(self):
+        self.odfFile.close()
 
-  def readDocument(self):
-    return self.odfFile.read("content.xml")
+    def readDocument(self):
+        return self.odfFile.read("content.xml")
 
-  def readManifest(self):
-    return self.odfFile.read("META-INF/manifest.xml")
+    def readManifest(self):
+        return self.odfFile.read("META-INF/manifest.xml")
 
-  def writeDocument(self, doc):
-    self.odfFile.writestr("content.xml", doc.encode("utf-8"))
+    def writeDocument(self, doc):
+        self.odfFile.writestr("content.xml", doc.encode("utf-8"))
 
-  def writeManifest(self, doc):
-    self.odfFile.writestr("META-INF/manifest.xml", doc.encode("utf-8"))
+    def writeManifest(self, doc):
+        self.odfFile.writestr("META-INF/manifest.xml", doc.encode("utf-8"))
 
-  def addPicture(self, imgPath, arcName):
-    self.odfFile.write(imgPath, "Pictures/" + arcName)
+    def addPicture(self, imgPath, arcName):
+        self.odfFile.write(imgPath, "Pictures/" + arcName)
+
 
 class ODFParser(QObject):
-  def __init__(self, parent=None):
-    QObject.__init__(self)
+    def __init__(self, parent=None):
+        QObject.__init__(self)
 
-    self.content = QDomDocument()
-    self.manifest = QDomDocument()
+        self.content = QDomDocument()
+        self.manifest = QDomDocument()
 
-  def setContent(self, text):
-    self.content.setContent(text)
+    def setContent(self, text):
+        self.content.setContent(text)
 
-  def setManifest(self, text):
-    self.manifest.setContent(text)
+    def setManifest(self, text):
+        self.manifest.setContent(text)
 
-  def getContent(self):
-    return str(self.content.toString())
+    def getContent(self):
+        return str(self.content.toString())
 
-  def getManifest(self):
-    return str(self.manifest.toString())
+    def getManifest(self):
+        return str(self.manifest.toString())
 
-  def addPictureToManifest(self, imgName):
-    root = self.manifest.documentElement()
+    def addPictureToManifest(self, imgName):
+        root = self.manifest.documentElement()
 
-    elem = self.manifest.createElement("manifest:file-entry")
-    elem.setAttribute("manifest:full-path", "Pictures/" + imgName)
-    elem.setAttribute("manifest:media-type", "")
+        elem = self.manifest.createElement("manifest:file-entry")
+        elem.setAttribute("manifest:full-path", "Pictures/" + imgName)
+        elem.setAttribute("manifest:media-type", "")
 
-    root.appendChild(elem)
+        root.appendChild(elem)
 
-  def substitute(self, substitutions):
-    if len(substitutions) > 0:
-      xmlString = self.content.toString()
-      for k, v in list(substitutions.items()):
-        xmlString = xmlString.replace(k, self.encodeStringForXML(v))
+    def substitute(self, substitutions):
+        if len(substitutions) > 0:
+            xmlString = self.content.toString()
+            for k, v in list(substitutions.items()):
+                xmlString = xmlString.replace(k, self.encodeStringForXML(v))
 
-      success, errorString, errorLine, errorColumn = self.content.setContent(xmlString, True)
-      if not success:
-        return False
+            success, errorString, errorLine, errorColumn = (
+                self.content.setContent(xmlString, True)
+            )
+            if not success:
+                return False
 
-    return True
-
-  def encodeStringForXML(self, string):
-    modifiedStr = string
-    modifiedStr.replace("&", "&amp;")
-    modifiedStr.replace("\"", "&quot;") # maybe \&quot; ?
-    modifiedStr.replace("'", "&apos;")
-    modifiedStr.replace("<", "&lt;")
-    modifiedStr.replace(">", "&gt;")
-    return modifiedStr
-
-  def getTextElement(self):
-    root = self.content.documentElement()
-    docBody = root.firstChildElement("office:body")
-    textBody = docBody.firstChildElement("office:text")
-
-    return textBody
-
-  def findPlaceholder(self, placeholder):
-    root = self.content.documentElement()
-    docBody = root.firstChildElement("office:body")
-    textBody = docBody.firstChildElement("office:text")
-
-    child = textBody.firstChildElement("text:p")
-    while not child.isNull():
-      if placeholder.lower() in child.text().lower():
-        return child
-      child = child.nextSiblingElement()
-
-    return None
-
-  def addPictureToDocument(self, mark, imgName, width, height):
-    root = self.content.documentElement()
-
-    # check if style for graphics items exists
-    stylesSection = root.firstChildElement("office:automatic-styles")
-    styleFound = False
-    style = stylesSection.firstChildElement("style:style")
-    while not style.isNull():
-      if style.attribute("style:name") == "fr1" and style.attribute("style:family") == "graphic":
-        styleFound = True
-        break
-      style = style.nextSiblingElement()
-
-    if not styleFound:
-      style = stylesSection.ownerDocument().createElement("style:style")
-      style.setAttribute("style:name", "fr1")
-      style.setAttribute("style:family", "graphic")
-      style.setAttribute("style:parent-style-name", "Graphics")
-
-      props = style.ownerDocument().createElement("style:graphic-properties")
-      props.setAttribute("style:wrap", "none")
-      props.setAttribute("style:horizontal-pos", "center")
-      props.setAttribute("style:horizontal-rel", "paragraph")
-
-      style.appendChild(props)
-      stylesSection.appendChild(style)
-
-    docBody = root.firstChildElement("office:body")
-    textBody = docBody.firstChildElement("office:text")
-    child = textBody.firstChildElement("text:p")
-    while not child.isNull():
-      if mark.lower() in child.text().lower():
-        # found marker, now replace it with image
-
-        if child.hasChildNodes():
-          cn = child.firstChild()
-          child.removeChild(cn)
-          cn = cn.nextSibling()
-
-        child.setTagName("text:p")
-        child.setAttribute("text:style-name", "Standard")
-
-        drawFrame = child.ownerDocument().createElement("draw:frame")
-        drawFrame.setAttribute("draw:style-name", "fr1")
-        drawFrame.setAttribute("draw:name", imgName)
-        drawFrame.setAttribute("text:anchor-type", "paragraph")
-        drawFrame.setAttribute("svg:width", str(width) + "cm")
-        drawFrame.setAttribute("svg:height", str(height) + "cm")
-        drawFrame.setAttribute("draw:z-index", 0)
-
-        drawImage = drawFrame.ownerDocument().createElement("draw:image")
-        drawImage.setAttribute("xlink:href", "Pictures/" + imgName)
-        drawImage.setAttribute("xlink:type", "simple")
-        drawImage.setAttribute("xlink:show", "embed")
-        drawImage.setAttribute("xlink:actuate", "onLoad")
-
-        drawFrame.appendChild(drawImage)
-        child.appendChild(drawFrame)
         return True
 
-      child = child.nextSiblingElement()
+    def encodeStringForXML(self, string):
+        modifiedStr = string
+        modifiedStr.replace("&", "&amp;")
+        modifiedStr.replace('"', "&quot;")  # maybe \&quot; ?
+        modifiedStr.replace("'", "&apos;")
+        modifiedStr.replace("<", "&lt;")
+        modifiedStr.replace(">", "&gt;")
+        return modifiedStr
 
-    return False
+    def getTextElement(self):
+        root = self.content.documentElement()
+        docBody = root.firstChildElement("office:body")
+        textBody = docBody.firstChildElement("office:text")
 
-  def addParagraph(self, text):
-    root = self.content.documentElement()
+        return textBody
 
-    docBody = root.firstChildElement("office:body")
-    textBody = docBody.firstChildElement("office:text")
+    def findPlaceholder(self, placeholder):
+        root = self.content.documentElement()
+        docBody = root.firstChildElement("office:body")
+        textBody = docBody.firstChildElement("office:text")
 
-    paragraphBody = textBody.ownerDocument().createElement("text:p")
-    paragraphSpan = paragraphBody.ownerDocument().createElement("text:span")
-    paragraphValue = paragraphSpan.ownerDocument().createTextNode(str(text))
+        child = textBody.firstChildElement("text:p")
+        while not child.isNull():
+            if placeholder.lower() in child.text().lower():
+                return child
+            child = child.nextSiblingElement()
 
-    if len(text) > 0:
-      paragraphSpan.appendChild(paragraphValue)
+        return None
 
-    paragraphBody.appendChild(paragraphSpan)
-    return paragraphBody
+    def addPictureToDocument(self, mark, imgName, width, height):
+        root = self.content.documentElement()
 
-  def addTable(self, tableName, columns):
-    root = self.content.documentElement()
+        # check if style for graphics items exists
+        stylesSection = root.firstChildElement("office:automatic-styles")
+        styleFound = False
+        style = stylesSection.firstChildElement("style:style")
+        while not style.isNull():
+            if (
+                style.attribute("style:name") == "fr1"
+                and style.attribute("style:family") == "graphic"
+            ):
+                styleFound = True
+                break
+            style = style.nextSiblingElement()
 
-    docBody = root.firstChildElement("office:body")
-    textBody = docBody.firstChildElement("office:text")
+        if not styleFound:
+            style = stylesSection.ownerDocument().createElement("style:style")
+            style.setAttribute("style:name", "fr1")
+            style.setAttribute("style:family", "graphic")
+            style.setAttribute("style:parent-style-name", "Graphics")
 
-    tableBody = textBody.ownerDocument().createElement("table:table")
-    tableBody.setAttribute("table:name", tableName)
+            props = style.ownerDocument().createElement(
+                "style:graphic-properties"
+            )
+            props.setAttribute("style:wrap", "none")
+            props.setAttribute("style:horizontal-pos", "center")
+            props.setAttribute("style:horizontal-rel", "paragraph")
 
-    tableColumns = tableBody.ownerDocument().createElement("table:table-column")
-    tableColumns.setAttribute("table:number-columns-repeated", columns)
+            style.appendChild(props)
+            stylesSection.appendChild(style)
 
-    tableBody.appendChild(tableColumns)
+        docBody = root.firstChildElement("office:body")
+        textBody = docBody.firstChildElement("office:text")
+        child = textBody.firstChildElement("text:p")
+        while not child.isNull():
+            if mark.lower() in child.text().lower():
+                # found marker, now replace it with image
 
-    return tableBody
+                if child.hasChildNodes():
+                    cn = child.firstChild()
+                    child.removeChild(cn)
+                    cn = cn.nextSibling()
 
-  def addTableRow(self, table, data):
-    tableRow = table.ownerDocument().createElement("table:table-row")
-    for d in data:
-      tableCell = tableRow.ownerDocument().createElement("table:table-cell")
-      tableCell.setAttribute("office:value-type", "string")
+                child.setTagName("text:p")
+                child.setAttribute("text:style-name", "Standard")
 
-      cellContentParagraph = tableCell.ownerDocument().createElement("text:p")
-      cellContentSpan = cellContentParagraph.ownerDocument().createElement("text:span")
-      if d is None:
-        cellValue = cellContentSpan.ownerDocument().createTextNode("")
-      else:
-        cellValue = cellContentSpan.ownerDocument().createTextNode(str(d))
+                drawFrame = child.ownerDocument().createElement("draw:frame")
+                drawFrame.setAttribute("draw:style-name", "fr1")
+                drawFrame.setAttribute("draw:name", imgName)
+                drawFrame.setAttribute("text:anchor-type", "paragraph")
+                drawFrame.setAttribute("svg:width", str(width) + "cm")
+                drawFrame.setAttribute("svg:height", str(height) + "cm")
+                drawFrame.setAttribute("draw:z-index", 0)
 
-      cellContentSpan.appendChild(cellValue)
-      cellContentParagraph.appendChild(cellContentSpan)
-      tableCell.appendChild(cellContentParagraph)
-      tableRow.appendChild(tableCell)
+                drawImage = drawFrame.ownerDocument().createElement(
+                    "draw:image"
+                )
+                drawImage.setAttribute("xlink:href", "Pictures/" + imgName)
+                drawImage.setAttribute("xlink:type", "simple")
+                drawImage.setAttribute("xlink:show", "embed")
+                drawImage.setAttribute("xlink:actuate", "onLoad")
 
-    table.appendChild(tableRow)
+                drawFrame.appendChild(drawImage)
+                child.appendChild(drawFrame)
+                return True
 
-  def writeTable(self, table):
-    root = self.content.documentElement()
+            child = child.nextSiblingElement()
 
-    docBody = root.firstChildElement("office:body")
-    textBody = docBody.firstChildElement("office:text")
+        return False
 
-    textBody.appendChild(table)
+    def addParagraph(self, text):
+        root = self.content.documentElement()
+
+        docBody = root.firstChildElement("office:body")
+        textBody = docBody.firstChildElement("office:text")
+
+        paragraphBody = textBody.ownerDocument().createElement("text:p")
+        paragraphSpan = paragraphBody.ownerDocument().createElement(
+            "text:span"
+        )
+        paragraphValue = paragraphSpan.ownerDocument().createTextNode(
+            str(text)
+        )
+
+        if len(text) > 0:
+            paragraphSpan.appendChild(paragraphValue)
+
+        paragraphBody.appendChild(paragraphSpan)
+        return paragraphBody
+
+    def addTable(self, tableName, columns):
+        root = self.content.documentElement()
+
+        docBody = root.firstChildElement("office:body")
+        textBody = docBody.firstChildElement("office:text")
+
+        tableBody = textBody.ownerDocument().createElement("table:table")
+        tableBody.setAttribute("table:name", tableName)
+
+        tableColumns = tableBody.ownerDocument().createElement(
+            "table:table-column"
+        )
+        tableColumns.setAttribute("table:number-columns-repeated", columns)
+
+        tableBody.appendChild(tableColumns)
+
+        return tableBody
+
+    def addTableRow(self, table, data):
+        tableRow = table.ownerDocument().createElement("table:table-row")
+        for d in data:
+            tableCell = tableRow.ownerDocument().createElement(
+                "table:table-cell"
+            )
+            tableCell.setAttribute("office:value-type", "string")
+
+            cellContentParagraph = tableCell.ownerDocument().createElement(
+                "text:p"
+            )
+            cellContentSpan = (
+                cellContentParagraph.ownerDocument().createElement("text:span")
+            )
+            if d is None:
+                cellValue = cellContentSpan.ownerDocument().createTextNode("")
+            else:
+                cellValue = cellContentSpan.ownerDocument().createTextNode(
+                    str(d)
+                )
+
+            cellContentSpan.appendChild(cellValue)
+            cellContentParagraph.appendChild(cellContentSpan)
+            tableCell.appendChild(cellContentParagraph)
+            tableRow.appendChild(tableCell)
+
+        table.appendChild(tableRow)
+
+    def writeTable(self, table):
+        root = self.content.documentElement()
+
+        docBody = root.firstChildElement("office:body")
+        textBody = docBody.firstChildElement("office:text")
+
+        textBody.appendChild(table)

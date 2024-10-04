@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#******************************************************************************
+# ******************************************************************************
 #
 # SimpleReports
 # ---------------------------------------------------------
@@ -23,9 +23,12 @@
 # to the Free Software Foundation, 51 Franklin Street, Suite 500 Boston,
 # MA 02110-1335 USA.
 #
-#******************************************************************************
+# ******************************************************************************
 
 from __future__ import absolute_import
+
+
 def classFactory(iface):
-  from .simplereports import SimpleReportsPlugin
-  return SimpleReportsPlugin(iface)
+    from .simplereports import SimpleReportsPlugin
+
+    return SimpleReportsPlugin(iface)
