@@ -178,7 +178,7 @@ class SimpleReportsPlugin(object):
 
     def about(self):
         d = aboutdialog.AboutDialog()
-        d.exec_()
+        d.exec()
 
     def __dockVisibilityChanged(self):
         if self.dockWidget.isVisible():
