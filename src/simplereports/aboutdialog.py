@@ -50,7 +50,7 @@ class AboutDialog(QDialog, Ui_Dialog):
 
         self.lblLogo.setPixmap(QPixmap(icons_path + "simplereports.png"))
 
-        cfg = configparser.SafeConfigParser()
+        cfg = configparser.ConfigParser()
         cfg.read(os.path.join(os.path.dirname(__file__), "metadata.txt"))
         version = cfg.get("general", "version")
         self.lblVersion.setText(self.tr("Version: %s") % (version))
