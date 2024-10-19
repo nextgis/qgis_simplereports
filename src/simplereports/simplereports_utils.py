@@ -63,7 +63,7 @@ def getLayerGroup(relations, lay) -> list:
 
 def findNodes(group, node):
     parent = node.parent()
-    if type(parent) == QgsLayerTree:
+    if isinstance(parent, QgsLayerTree):
         return
     else:
         group.append(parent.name())
