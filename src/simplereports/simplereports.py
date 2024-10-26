@@ -29,6 +29,7 @@
 from builtins import str
 from builtins import object
 import os
+from pathlib import Path
 from qgis.PyQt.QtCore import (
     QFileInfo,
     QSettings,
@@ -177,7 +178,8 @@ class SimpleReportsPlugin(object):
             self.dockWidget.show()
 
     def about(self):
-        d = aboutdialog.AboutDialog()
+        package_name = str(Path(__file__).parent.name)
+        d = aboutdialog.AboutDialog(package_name)
         d.exec()
 
     def __dockVisibilityChanged(self):
