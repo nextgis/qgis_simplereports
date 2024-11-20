@@ -26,26 +26,27 @@
 # ******************************************************************************
 
 
-from builtins import str
-from builtins import object
 import os
+from builtins import object, str
 from pathlib import Path
+
+from qgis.core import *
 from qgis.PyQt.QtCore import (
-    QFileInfo,
-    QSettings,
-    QLocale,
-    QTranslator,
     QCoreApplication,
+    QFileInfo,
+    QLocale,
+    QSettings,
     Qt,
+    QTranslator,
 )
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QMessageBox
 
-from qgis.core import *
-
-from . import simplereportswidget
-from . import aboutdialog
-
+from . import (
+    aboutdialog,
+    resources,  # noqa: F401
+    simplereportswidget,
+)
 
 resources_path = os.path.join(os.path.dirname(__file__), "resources/")
 icons_path = os.path.join(os.path.dirname(__file__), "icons/")
@@ -154,6 +155,15 @@ class SimpleReportsPlugin(object):
         self.dockWidget = simplereportswidget.SimpleReportsDockWidget(self)
         self.iface.addDockWidget(Qt.LeftDockWidgetArea, self.dockWidget)
         self.dockWidget.visibilityChanged.connect(self.__dockVisibilityChanged)
+
+        self.__show_help_action = QAction(
+            QIcon(icons_path + "simplereports.png"),
+            "SimpleReports",
+        )
+        self.__show_help_action.triggered.connect(self.about)
+        plugin_help_menu = self.iface.pluginHelpMenu()
+        assert plugin_help_menu is not None
+        plugin_help_menu.addAction(self.__show_help_action)
 
     def unload(self):
         self.iface.removeToolBarIcon(self.actionDock)
