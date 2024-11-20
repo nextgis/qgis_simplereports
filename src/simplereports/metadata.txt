@@ -7,8 +7,9 @@ about=Intersect a given area with layers and produce an OpenOffice ODT report. D
 about[ru]=Пересеките заданную область слоями и создайте отчет OpenOffice ODT. Разработан NextGIS. Любые отзывы приветствуются на https://nextgis.com/contact
 about[pt]=Intersectar uma determinada área com camadas e produzir um relatório ODT do OpenOffice. Desenvolvido por NextGIS. Qualquer feedback é bem-vindo em https://nextgis.com/contact
 category=Plugins
-version=0.3.0
-qgisMinimumVersion=3.4
+version=0.4.0
+qgisMinimumVersion=3.22
+qgisMaximumVersion=3.99
 
 author=NextGIS
 email=info@nextgis.org
@@ -23,3 +24,8 @@ repository=http://github.com/nextgis/simplereports
 
 experimental=True
 deprecated=False
+
+changelog =
+    0.4.0
+        * Updated the "About plugin" dialog
+        * Added plugin item to help menu

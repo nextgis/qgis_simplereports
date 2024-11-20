@@ -1,12 +1,13 @@
 [project]
 name = "simplereports"
-version = "0.3.0"
+version = "0.4.0"
 readme = "README.md"
 license = { file = "LICENSE" }
 
 
 [tool.qgspb.package-data]
-"simplereports.icons" = ["simplereports.png", "about.png"]
+"simplereports.icons" = ["*.png"]
+"simplereports.resources" = ["*"]
 
 [tool.qgspb.forms]
 ui-files = ["src/simplereports/ui/*.ui"]
